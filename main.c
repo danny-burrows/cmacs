@@ -5,6 +5,8 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_events.h>
 
+#include "label.h"
+
 char        *window_title  = "Cmacs";
 unsigned int window_width  = 640;
 unsigned int window_height = 480;
@@ -102,6 +104,8 @@ int main(int argc, char *args[])
     SDL_Texture *logo_image = SDL_CreateTextureFromSurface(renderer, logo_image_surface);
     SDL_FreeSurface(logo_image_surface);
 
+    Label *new_label = Label_Create(renderer, "Hello Labels.", 20, 20, font_regular);
+
     SDL_Event event;
     while (1) {
 
@@ -155,6 +159,8 @@ int main(int argc, char *args[])
         SDL_RenderCopy(renderer, message, NULL, &message_rect);
 
         SDL_RenderCopy(renderer, logo_image, NULL, &logo_rect);
+
+        Label_RenderCopy(renderer, new_label);
         
         // Present frame.
         SDL_RenderPresent(renderer);
