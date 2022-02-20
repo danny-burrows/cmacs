@@ -83,7 +83,7 @@ int main(int argc, char *args[])
     );
     SDL_Rect message_rect = {
         window_width / 2 - (message_surface->w / 2),
-        window_height / 2 - (message_surface->h / 2) + 45,
+        window_height / 2 - (message_surface->h / 2) + 100,
         message_surface->w,
         message_surface->h
     };
@@ -92,12 +92,12 @@ int main(int argc, char *args[])
 
     // Logo image.
     IMG_Init(IMG_INIT_PNG);
-    SDL_Surface *logo_image_surface = IMG_Load("assets/Cmacs-Logo-Full.png");
+    SDL_Surface *logo_image_surface = IMG_Load("assets/cmacs-logo.svg");
     SDL_Rect logo_rect = {
-        window_width / 2 - (logo_image_surface->w / 14),
-        window_height / 2 - (logo_image_surface->h / 14) - 45,
-        logo_image_surface->w / 7,
-        logo_image_surface->h / 7
+        window_width / 2 - (logo_image_surface->w / 2),
+        window_height / 2 - (logo_image_surface->h / 2) - 40,
+        logo_image_surface->w,
+        logo_image_surface->h
     };
     SDL_Texture *logo_image = SDL_CreateTextureFromSurface(renderer, logo_image_surface);
     SDL_FreeSurface(logo_image_surface);
@@ -136,11 +136,11 @@ int main(int argc, char *args[])
 
                         // Calc text position.
                         message_rect.x = window_width / 2 - (message_rect.w / 2);
-                        message_rect.y = window_height / 2 - (message_rect.h / 2) + 45;
+                        message_rect.y = window_height / 2 - (message_rect.h / 2) + 100;
 
                         // Calc logo position.
                         logo_rect.x = window_width / 2 - (logo_rect.w / 2);
-                        logo_rect.y = window_height / 2 - (logo_rect.h / 2) - 45;
+                        logo_rect.y = window_height / 2 - (logo_rect.h / 2) - 40;
 
                         break;
                 }
