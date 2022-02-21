@@ -65,9 +65,10 @@ int main(int argc, char *args[])
 
     // Initialise and prepare font.
     TTF_Init();
-    TTF_Font *font_regular = TTF_OpenFont("open_sans.ttf", 20);
-    TTF_Font *font_large = TTF_OpenFont("open_sans.ttf", 64);
-    if (font_large == NULL || font_regular == NULL) {
+    TTF_Font *font_regular = TTF_OpenFont("open_sans.ttf", 15);
+    TTF_Font *font_large = TTF_OpenFont("open_sans.ttf", 20);
+    TTF_Font *font_larger = TTF_OpenFont("open_sans.ttf", 64);
+    if (font_regular == NULL || font_large == NULL || font_larger == NULL) {
         fprintf(stderr, "TTF Failed to load font: Not found :/\n");
 
         SDL_DestroyRenderer(renderer);
@@ -79,13 +80,13 @@ int main(int argc, char *args[])
     // Hello world text.
     SDL_Color white = {255, 255, 255, 255};
     SDL_Surface *message_surface = TTF_RenderText_Blended(
-        font_regular, 
+        font_large, 
         "Inoperable project to make Emacs with a better paradigm.", 
         white
     );
     SDL_Rect message_rect = {
         window_width / 2 - (message_surface->w / 2),
-        window_height / 2 - (message_surface->h / 2) + 100,
+        window_height / 2 - (message_surface->h / 2) + 115,
         message_surface->w,
         message_surface->h
     };
@@ -94,12 +95,12 @@ int main(int argc, char *args[])
 
     // Logo image.
     IMG_Init(IMG_INIT_PNG);
-    SDL_Surface *logo_image_surface = IMG_Load("assets/cmacs-logo.svg");
+    SDL_Surface *logo_image_surface = IMG_Load("assets/cmacs-icon.svg");
     SDL_Rect logo_rect = {
-        window_width / 2 - (logo_image_surface->w / 2),
-        window_height / 2 - (logo_image_surface->h / 2) - 40,
-        logo_image_surface->w,
-        logo_image_surface->h
+        window_width / 2 - (logo_image_surface->w / 4),
+        window_height / 2 - (logo_image_surface->h / 4) - 40,
+        logo_image_surface->w / 2,
+        logo_image_surface->h / 2
     };
     SDL_Texture *logo_image = SDL_CreateTextureFromSurface(renderer, logo_image_surface);
     SDL_FreeSurface(logo_image_surface);
@@ -140,7 +141,7 @@ int main(int argc, char *args[])
 
                         // Calc text position.
                         message_rect.x = window_width / 2 - (message_rect.w / 2);
-                        message_rect.y = window_height / 2 - (message_rect.h / 2) + 100;
+                        message_rect.y = window_height / 2 - (message_rect.h / 2) + 115;
 
                         // Calc logo position.
                         logo_rect.x = window_width / 2 - (logo_rect.w / 2);
