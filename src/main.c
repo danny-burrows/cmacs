@@ -7,15 +7,14 @@
 
 #include "ui/label.h"
 
-char        *window_title  = "Cmacs";
-unsigned int window_width  = 640;
-unsigned int window_height = 480;
+static char        *window_title  = "Cmacs";
+static unsigned int window_width  = 640;
+static unsigned int window_height = 480;
 
+SDL_Color white = {255, 255, 255, 255};
 
 static SDL_Window *init_sdl2_window()
 {
-    SDL_Window *window;
-
     // Initialise SDL.
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
         fprintf(stderr, "SDL failed to initialise: %s\n", SDL_GetError());
@@ -25,7 +24,7 @@ static SDL_Window *init_sdl2_window()
     }
 
     // Initialise SDL window.
-    window = SDL_CreateWindow(
+    SDL_Window *window = SDL_CreateWindow(
         window_title,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
@@ -52,6 +51,10 @@ int main(int argc, char *args[])
     SDL_Window *window = init_sdl2_window();
     if (window == NULL) return -1;
 
+    // Initialise image and font support.
+    IMG_Init(IMG_INIT_PNG);
+    TTF_Init();
+
     // Create SDL2 Renderer.
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == NULL) {
@@ -63,8 +66,7 @@ int main(int argc, char *args[])
         return -1;
     }
 
-    // Initialise and prepare font.
-    TTF_Init();
+    // Initialise and prepare fonts.
     TTF_Font *font_regular = TTF_OpenFont("open_sans.ttf", 15);
     TTF_Font *font_large = TTF_OpenFont("open_sans.ttf", 20);
     TTF_Font *font_larger = TTF_OpenFont("open_sans.ttf", 64);
@@ -77,24 +79,17 @@ int main(int argc, char *args[])
         return -1;
     }
 
-    // Hello world text.
-    SDL_Color white = {255, 255, 255, 255};
-    SDL_Surface *message_surface = TTF_RenderText_Blended(
-        font_large, 
+    // Tagline text.
+    Label *tagline = Label_Create(renderer, 
         "Inoperable project to make Emacs with a better paradigm.", 
-        white
+        0, 0, font_large, white, 0, 0, 0
     );
-    SDL_Rect message_rect = {
-        window_width / 2 - (message_surface->w / 2),
-        window_height / 2 - (message_surface->h / 2) + 115,
-        message_surface->w,
-        message_surface->h
-    };
-    SDL_Texture *message = SDL_CreateTextureFromSurface(renderer, message_surface);
-    SDL_FreeSurface(message_surface);
+    Label_SetPos(tagline, 
+        window_width / 2 - (tagline->rect.w / 2),
+        window_height / 2 - (tagline->rect.h / 2) + 115
+    );
 
     // Logo image.
-    IMG_Init(IMG_INIT_PNG);
     SDL_Surface *logo_image_surface = IMG_Load("assets/cmacs-icon.svg");
     SDL_Rect logo_rect = {
         window_width / 2 - (logo_image_surface->w / 4),
@@ -105,7 +100,7 @@ int main(int argc, char *args[])
     SDL_Texture *logo_image = SDL_CreateTextureFromSurface(renderer, logo_image_surface);
     SDL_FreeSurface(logo_image_surface);
 
-    Label *new_label = Label_Create(renderer, "Hello Labels.", 20, 20, font_regular);
+    Label *new_label = Label_Create(renderer, "Hello Labels.", 20, 20, font_regular, white, 1, 10, 1);
 
     SDL_Event event;
     while (1) {
@@ -140,8 +135,10 @@ int main(int argc, char *args[])
                         window_height = event.window.data2;
 
                         // Calc text position.
-                        message_rect.x = window_width / 2 - (message_rect.w / 2);
-                        message_rect.y = window_height / 2 - (message_rect.h / 2) + 115;
+                        Label_SetPos(tagline, 
+                            window_width / 2 - (tagline->rect.w / 2),
+                            window_height / 2 - (tagline->rect.h / 2) + 115
+                        );
 
                         // Calc logo position.
                         logo_rect.x = window_width / 2 - (logo_rect.w / 2);
@@ -156,9 +153,7 @@ int main(int argc, char *args[])
         SDL_SetRenderDrawColor(renderer, 40, 40, 45, 255);
         SDL_RenderClear(renderer);
         
-        // Print message.
-        SDL_RenderCopy(renderer, message, NULL, &message_rect);
-
+        Label_RenderCopy(renderer, tagline);
         SDL_RenderCopy(renderer, logo_image, NULL, &logo_rect);
 
         Label_RenderCopy(renderer, new_label);
