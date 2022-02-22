@@ -1,4 +1,4 @@
-#include "label.h"
+#include "ui/label.h"
 
 Label *Label_Create(SDL_Renderer *renderer, const char *label_text, int x, int y, TTF_Font *label_font) 
 {

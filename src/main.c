@@ -5,7 +5,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_events.h>
 
-#include "label.h"
+#include "ui/label.h"
 
 char        *window_title  = "Cmacs";
 unsigned int window_width  = 640;
