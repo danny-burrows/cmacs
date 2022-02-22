@@ -7,7 +7,7 @@
 
 #include "ui/label.h"
 
-static char        *window_title  = "Cmacs";
+static char        *window_title  = "cmacs";
 static unsigned int window_width  = 640;
 static unsigned int window_height = 480;
 

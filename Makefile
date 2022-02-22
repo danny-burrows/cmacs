@@ -1,4 +1,4 @@
-target = Cmacs
+target = cmacs
 
 include = -I src
 srcs := $(shell find ./src -name '*.c')
