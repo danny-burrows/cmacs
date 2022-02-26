@@ -6,6 +6,7 @@
 #include <SDL2/SDL_events.h>
 
 #include "ui/label.h"
+#include "ui/button.h"
 
 static char        *window_title  = "cmacs";
 static unsigned int window_width  = 640;
@@ -101,6 +102,7 @@ int main(int argc, char *args[])
     SDL_FreeSurface(logo_image_surface);
 
     Label *new_label = Label_Create(renderer, "Hello Labels.", 20, 20, font_regular, white, 1, 10, 1);
+    Button *new_button = Button_Create(renderer, 20, 55, "Hello Buttons.", font_regular, white, 10, 1);
 
     SDL_Event event;
     while (1) {
@@ -121,16 +123,27 @@ int main(int argc, char *args[])
                         break;
                     }
                     break;
+                
+                case SDL_MOUSEMOTION:
+                    Button_HoverCheck(new_button, event.motion.x, event.motion.y);
+                    break;
+
+                case SDL_MOUSEBUTTONDOWN:
+                    if (event.button.button == SDL_BUTTON_LEFT) {
+                        Button_PressCheck(new_button);
+                    }                    
+                    break;
+
+                case SDL_MOUSEBUTTONUP:
+                    if (event.button.button == SDL_BUTTON_LEFT) {
+                        Button_ReleaseCheck(new_button);
+                    }                           
+                    break;
             }
 
             if (event.type == SDL_WINDOWEVENT) {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_RESIZED:
-                        
-                        SDL_Log("Window %d resized to %dx%d",
-                                event.window.windowID, event.window.data1,
-                                event.window.data2);
-
                         window_width = event.window.data1; 
                         window_height = event.window.data2;
 
@@ -157,6 +170,7 @@ int main(int argc, char *args[])
         SDL_RenderCopy(renderer, logo_image, NULL, &logo_rect);
 
         Label_RenderCopy(renderer, new_label);
+        Button_RenderCopy(renderer, new_button);
         
         // Present frame.
         SDL_RenderPresent(renderer);
