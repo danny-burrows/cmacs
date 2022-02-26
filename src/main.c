@@ -1,10 +1,10 @@
 #include <stdio.h>
 
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_events.h>
 
+#include "fonts.h"
 #include "ui/label.h"
 #include "ui/button.h"
 
@@ -68,11 +68,8 @@ int main(int argc, char *args[])
     }
 
     // Initialise and prepare fonts.
-    TTF_Font *font_regular = TTF_OpenFont("open_sans.ttf", 15);
-    TTF_Font *font_large = TTF_OpenFont("open_sans.ttf", 20);
-    TTF_Font *font_larger = TTF_OpenFont("open_sans.ttf", 64);
-    if (font_regular == NULL || font_large == NULL || font_larger == NULL) {
-        fprintf(stderr, "TTF Failed to load font: Not found :/\n");
+    if (load_fonts() == -1) {
+        fprintf(stderr, "TTF Failed to load fonts.\n");
 
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -83,7 +80,7 @@ int main(int argc, char *args[])
     // Tagline text.
     Label *tagline = Label_Create(renderer, 0, 0,
         "Inoperable project to make Emacs with a better paradigm.", 
-        font_large, white, 0, 0, 0
+        fonts.font_large, white, 0, 0, 0
     );
     Label_SetPos(tagline, 
         window_width / 2 - (tagline->rect.w / 2),
@@ -101,17 +98,17 @@ int main(int argc, char *args[])
     SDL_Texture *logo_image = SDL_CreateTextureFromSurface(renderer, logo_image_surface);
     SDL_FreeSurface(logo_image_surface);
 
-    Label *new_label = Label_Create(renderer, 20, 20, "Hello Labels.", font_regular, white, 1, 10, 1);
-    Label *test_label = Label_Create(renderer, 200, 20, "Testing Label 2", font_regular, white, 1, 10, 1);
+    Label *new_label = Label_Create(renderer, 20, 20, "Hello Labels.", fonts.font_regular, white, 1, 10, 1);
+    Label *test_label = Label_Create(renderer, 200, 20, "Testing Label 2", fonts.font_regular, white, 1, 10, 1);
 
-    Button *new_button = Button_Create(renderer, 20, 55, "Hello Buttons.", font_regular, white, 10, 1);
+    Button *new_button = Button_Create(renderer, 20, 55, "Hello Buttons.", fonts.font_regular, white, 10, 1);
 
-    Button *new_button1 = Button_Create(renderer, 20, 100, "List of Buttons", font_regular, white, 10, 1);
-    Button *new_button2 = Button_Create(renderer, 20, 130, "List of Buttons", font_regular, white, 10, 1);
-    Button *new_button3 = Button_Create(renderer, 20, 160, "List of Buttons", font_regular, white, 10, 1);
-    Button *new_button4 = Button_Create(renderer, 20, 190, "List of Buttons", font_regular, white, 10, 1);
-    Button *new_button5 = Button_Create(renderer, 20, 220, "List of Buttons", font_regular, white, 10, 1);
-    Button *new_button6 = Button_Create(renderer, 20, 250, "List of Buttons", font_regular, white, 10, 1);
+    Button *new_button1 = Button_Create(renderer, 20, 100, "List of Buttons", fonts.font_regular, white, 10, 1);
+    Button *new_button2 = Button_Create(renderer, 20, 130, "List of Buttons", fonts.font_regular, white, 10, 1);
+    Button *new_button3 = Button_Create(renderer, 20, 160, "List of Buttons", fonts.font_regular, white, 10, 1);
+    Button *new_button4 = Button_Create(renderer, 20, 190, "List of Buttons", fonts.font_regular, white, 10, 1);
+    Button *new_button5 = Button_Create(renderer, 20, 220, "List of Buttons", fonts.font_regular, white, 10, 1);
+    Button *new_button6 = Button_Create(renderer, 20, 250, "List of Buttons", fonts.font_regular, white, 10, 1);
 
     SDL_Event event;
     while (1) {
