@@ -1,19 +1,32 @@
 #include "ui/label.h"
 
-Label *Label_Create(SDL_Renderer *renderer, const char *label_text, int x, int y, TTF_Font *label_font, SDL_Color text_color, bool background, int pad_x, int pad_y) 
-{
+LabelRegister label_register;
+
+Label *Label_Create(
+    SDL_Renderer *renderer, 
+    int x, int y, 
+    const char *label_text, 
+    TTF_Font *label_font, 
+    SDL_Color text_color, 
+    bool background, 
+    int pad_x, int pad_y
+){
     Label *label = (Label *)malloc(sizeof(Label));
+
+    // Label reg stuff...
+    label->next = label_register.top_label;
+    label_register.top_label = label;
 
     label->text = label_text;
     label->background = background;
-    label->color = text_color;
+    label->text_color = text_color;
     label->pad_x = pad_x;
     label->pad_y = pad_y;
 
     SDL_Surface *label_text_surface = TTF_RenderText_Blended(
         label_font, 
         label->text, 
-        label->color
+        label->text_color
     );
 
     label->rect.x = x;
@@ -27,7 +40,7 @@ Label *Label_Create(SDL_Renderer *renderer, const char *label_text, int x, int y
     label->text_rect.w = label_text_surface->w;
     label->text_rect.h = label_text_surface->h;
 
-    label->texture = SDL_CreateTextureFromSurface(renderer, label_text_surface);
+    label->text_texture = SDL_CreateTextureFromSurface(renderer, label_text_surface);
     SDL_FreeSurface(label_text_surface);
     
     if (label->background) {
@@ -55,11 +68,31 @@ void Label_RenderCopy(SDL_Renderer *renderer, Label *label)
         SDL_RenderCopy(renderer, label->background_texture, NULL, &label->rect);
     }
 
-    SDL_RenderCopy(renderer, label->texture, NULL, &label->text_rect);
+    SDL_RenderCopy(renderer, label->text_texture, NULL, &label->text_rect);
 }
 
 void Label_Destroy(Label *label) {
-    SDL_DestroyTexture(label->texture);
+    SDL_DestroyTexture(label->text_texture);
     SDL_DestroyTexture(label->background_texture);
     free(label);
+}
+
+// These functions act on all labels in the label register...
+
+// Run a callback on all labels.
+void Label_CallFor_AllLabels(void (*callback)(Label *lbl)) {
+    Label *lbl = label_register.top_label;
+    while (lbl) {
+        callback(lbl);
+        lbl = lbl->next;
+    }
+}
+
+// Render copy all buttons.
+void Label_RenderCopy_AllLabels(SDL_Renderer *renderer) {
+    Label *lbl = label_register.top_label;
+    while (lbl) {
+        Label_RenderCopy(renderer, lbl);
+        lbl = lbl->next;
+    }
 }

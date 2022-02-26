@@ -54,7 +54,7 @@ typedef struct ButtonRegister_ {
 
 extern ButtonRegister button_register;
 
-void Button_CallFor_AllButtons(void (*callback)());
+void Button_CallFor_AllButtons(void (*callback)(Button *btn));
 
 void Button_HoverCheck_AllButtons(int mouse_x, int mouse_y);
 

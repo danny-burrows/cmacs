@@ -14,7 +14,7 @@ static unsigned int window_height = 480;
 
 SDL_Color white = {255, 255, 255, 255};
 
-static SDL_Window *init_sdl2_window()
+static SDL_Window *init_sdl2_window(void)
 {
     // Initialise SDL.
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
@@ -81,9 +81,9 @@ int main(int argc, char *args[])
     }
 
     // Tagline text.
-    Label *tagline = Label_Create(renderer, 
+    Label *tagline = Label_Create(renderer, 0, 0,
         "Inoperable project to make Emacs with a better paradigm.", 
-        0, 0, font_large, white, 0, 0, 0
+        font_large, white, 0, 0, 0
     );
     Label_SetPos(tagline, 
         window_width / 2 - (tagline->rect.w / 2),
@@ -101,7 +101,9 @@ int main(int argc, char *args[])
     SDL_Texture *logo_image = SDL_CreateTextureFromSurface(renderer, logo_image_surface);
     SDL_FreeSurface(logo_image_surface);
 
-    Label *new_label = Label_Create(renderer, "Hello Labels.", 20, 20, font_regular, white, 1, 10, 1);
+    Label *new_label = Label_Create(renderer, 20, 20, "Hello Labels.", font_regular, white, 1, 10, 1);
+    Label *test_label = Label_Create(renderer, 200, 20, "Testing Label 2", font_regular, white, 1, 10, 1);
+
     Button *new_button = Button_Create(renderer, 20, 55, "Hello Buttons.", font_regular, white, 10, 1);
 
     Button *new_button1 = Button_Create(renderer, 20, 100, "List of Buttons", font_regular, white, 10, 1);
@@ -173,11 +175,9 @@ int main(int argc, char *args[])
         SDL_SetRenderDrawColor(renderer, 40, 40, 45, 255);
         SDL_RenderClear(renderer);
         
-        Label_RenderCopy(renderer, tagline);
         SDL_RenderCopy(renderer, logo_image, NULL, &logo_rect);
 
-        Label_RenderCopy(renderer, new_label);
-
+        Label_RenderCopy_AllLabels(renderer);
         Button_RenderCopy_AllButtons(renderer);
         
         // Present frame.
