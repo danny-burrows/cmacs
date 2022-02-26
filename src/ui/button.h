@@ -21,6 +21,8 @@ typedef struct Button_ {
 
     bool             is_hovered;
     bool             is_pressed;
+
+    struct Button_  *next;
 } Button;
 
 Button *Button_Create(
@@ -43,5 +45,19 @@ void Button_ReleaseCheck(Button *button);
 void Button_RenderCopy(SDL_Renderer *renderer, Button *button);
 
 void Button_Destroy(Button *button);
+
+
+// Button register and the functions that use it.
+typedef struct ButtonRegister_ {
+    Button *top_button;
+} ButtonRegister;
+
+extern ButtonRegister button_register;
+
+void Button_CallFor_AllButtons(void (*callback)());
+
+void Button_HoverCheck_AllButtons(int mouse_x, int mouse_y);
+
+void Button_RenderCopy_AllButtons(SDL_Renderer *renderer);
 
 #endif

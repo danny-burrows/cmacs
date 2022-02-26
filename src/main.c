@@ -104,6 +104,13 @@ int main(int argc, char *args[])
     Label *new_label = Label_Create(renderer, "Hello Labels.", 20, 20, font_regular, white, 1, 10, 1);
     Button *new_button = Button_Create(renderer, 20, 55, "Hello Buttons.", font_regular, white, 10, 1);
 
+    Button *new_button1 = Button_Create(renderer, 20, 100, "List of Buttons", font_regular, white, 10, 1);
+    Button *new_button2 = Button_Create(renderer, 20, 130, "List of Buttons", font_regular, white, 10, 1);
+    Button *new_button3 = Button_Create(renderer, 20, 160, "List of Buttons", font_regular, white, 10, 1);
+    Button *new_button4 = Button_Create(renderer, 20, 190, "List of Buttons", font_regular, white, 10, 1);
+    Button *new_button5 = Button_Create(renderer, 20, 220, "List of Buttons", font_regular, white, 10, 1);
+    Button *new_button6 = Button_Create(renderer, 20, 250, "List of Buttons", font_regular, white, 10, 1);
+
     SDL_Event event;
     while (1) {
 
@@ -123,21 +130,21 @@ int main(int argc, char *args[])
                         break;
                     }
                     break;
-                
+
                 case SDL_MOUSEMOTION:
-                    Button_HoverCheck(new_button, event.motion.x, event.motion.y);
+                    Button_HoverCheck_AllButtons(event.motion.x, event.motion.y);
                     break;
 
                 case SDL_MOUSEBUTTONDOWN:
                     if (event.button.button == SDL_BUTTON_LEFT) {
-                        Button_PressCheck(new_button);
-                    }                    
+                        Button_CallFor_AllButtons(Button_PressCheck);            
+                    }
                     break;
 
-                case SDL_MOUSEBUTTONUP:
+                case SDL_MOUSEBUTTONUP:    
                     if (event.button.button == SDL_BUTTON_LEFT) {
-                        Button_ReleaseCheck(new_button);
-                    }                           
+                        Button_CallFor_AllButtons(Button_ReleaseCheck);
+                    }
                     break;
             }
 
@@ -170,7 +177,8 @@ int main(int argc, char *args[])
         SDL_RenderCopy(renderer, logo_image, NULL, &logo_rect);
 
         Label_RenderCopy(renderer, new_label);
-        Button_RenderCopy(renderer, new_button);
+
+        Button_RenderCopy_AllButtons(renderer);
         
         // Present frame.
         SDL_RenderPresent(renderer);
