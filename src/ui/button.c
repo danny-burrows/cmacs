@@ -41,20 +41,10 @@ Button *Button_Create(
     button->text_texture = SDL_CreateTextureFromSurface(renderer, button_text_surface);
     SDL_FreeSurface(button_text_surface);
 
-    // Background texture.
-    SDL_Surface *button_background_surface = IMG_Load("assets/ui/label-background.svg");
-    button->background_texture = SDL_CreateTextureFromSurface(renderer, button_background_surface);
-    SDL_FreeSurface(button_background_surface);
-
-    // Hovered Background texture.
-    SDL_Surface *button_hovered_background_surface = IMG_Load("assets/ui/button-hovered-background.svg");
-    button->hovered_background_texture = SDL_CreateTextureFromSurface(renderer, button_hovered_background_surface);
-    SDL_FreeSurface(button_hovered_background_surface);
-
-    // Pressed Background texture.
-    SDL_Surface *button_pressed_background_surface = IMG_Load("assets/ui/button-pressed-background.svg");
-    button->pressed_background_texture = SDL_CreateTextureFromSurface(renderer, button_pressed_background_surface);
-    SDL_FreeSurface(button_pressed_background_surface);
+    // Set background textures.
+    button->background_texture = textures.label_background;
+    button->hovered_background_texture = textures.button_hovered_background;
+    button->pressed_background_texture = textures.button_pressed_background;
 
     return button;
 }

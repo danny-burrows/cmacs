@@ -6,6 +6,8 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 
+#include "textures.h"
+
 typedef struct Button_ {
     const char      *text;
     SDL_Color        text_color;

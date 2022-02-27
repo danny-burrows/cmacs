@@ -6,6 +6,8 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_image.h>
 
+#include "textures.h"
+
 typedef struct Label_ {
     const char      *text;
     SDL_Color        text_color;
@@ -16,7 +18,6 @@ typedef struct Label_ {
     int              pad_x;
     int              pad_y;
     bool             background;
-    SDL_Texture     *background_texture;
 
     struct Label_   *next;
 } Label;

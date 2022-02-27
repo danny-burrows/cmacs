@@ -5,6 +5,7 @@
 #include <SDL2/SDL_events.h>
 
 #include "fonts.h"
+#include "textures.h"
 #include "ui/label.h"
 #include "ui/button.h"
 
@@ -70,6 +71,16 @@ int main(int argc, char *args[])
     // Initialise and prepare fonts.
     if (load_fonts() == -1) {
         fprintf(stderr, "TTF Failed to load fonts.\n");
+
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return -1;
+    }
+
+    // Load textures.
+    if (load_textures(renderer) == -1) {
+        fprintf(stderr, "Failed to load textures.\n");
 
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);

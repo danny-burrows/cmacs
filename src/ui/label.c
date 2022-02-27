@@ -42,13 +42,6 @@ Label *Label_Create(
 
     label->text_texture = SDL_CreateTextureFromSurface(renderer, label_text_surface);
     SDL_FreeSurface(label_text_surface);
-    
-    if (label->background) {
-        SDL_Surface *label_background_surface = IMG_Load("assets/ui/label-background.svg");
-
-        label->background_texture = SDL_CreateTextureFromSurface(renderer, label_background_surface);
-        SDL_FreeSurface(label_background_surface);
-    }
 
     return label;
 }
@@ -65,7 +58,7 @@ void Label_SetPos(Label *label, int x, int y) {
 void Label_RenderCopy(SDL_Renderer *renderer, Label *label)
 {
     if (label->background) {
-        SDL_RenderCopy(renderer, label->background_texture, NULL, &label->rect);
+        SDL_RenderCopy(renderer, textures.label_background, NULL, &label->rect);
     }
 
     SDL_RenderCopy(renderer, label->text_texture, NULL, &label->text_rect);
@@ -73,7 +66,6 @@ void Label_RenderCopy(SDL_Renderer *renderer, Label *label)
 
 void Label_Destroy(Label *label) {
     SDL_DestroyTexture(label->text_texture);
-    SDL_DestroyTexture(label->background_texture);
     free(label);
 }
 
