@@ -2,13 +2,18 @@
 
 ButtonRegister button_register;
 
+void default_press_callback(void) {
+    SDL_Log("Button Press!\n");
+}
+
 Button *Button_Create(
     SDL_Renderer *renderer, 
     int x, int y, 
     const char *button_text, 
     TTF_Font *button_font, 
     SDL_Color text_color, 
-    int pad_x, int pad_y
+    int pad_x, int pad_y,
+    void (*onpress)(void)
 ){
     Button *button = (Button *)calloc(1, sizeof(Button));
 
@@ -20,6 +25,12 @@ Button *Button_Create(
     button->text_color = text_color;
     button->pad_x = pad_x;
     button->pad_y = pad_y;
+
+    if (!onpress) {
+        button->onpress = *default_press_callback;    
+    } else {
+        button->onpress = onpress;
+    }
 
     SDL_Surface *button_text_surface = TTF_RenderText_Blended(
         button_font, 
@@ -71,7 +82,10 @@ void Button_HoverCheck(Button *button, int mouse_x, int mouse_y) {
 }
 
 void Button_PressCheck(Button *button) {
-    if (button->is_hovered) button->is_pressed = 1;
+    if (button->is_hovered) {
+        button->is_pressed = 1;
+        button->onpress();
+    }
 }
 
 void Button_ReleaseCheck(Button *button) {

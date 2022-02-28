@@ -24,6 +24,8 @@ typedef struct Button_ {
     bool             is_hovered;
     bool             is_pressed;
 
+    void            (*onpress)(void);
+
     struct Button_  *next;
 } Button;
 
@@ -33,7 +35,8 @@ Button *Button_Create(
     const char *button_text, 
     TTF_Font *button_font, 
     SDL_Color text_color, 
-    int pad_x, int pad_y
+    int pad_x, int pad_y,
+    void (*onpress)(void)
 );
 
 void Button_SetPos(Button *button, int x, int y);
