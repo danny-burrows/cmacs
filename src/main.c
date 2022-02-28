@@ -17,6 +17,57 @@ static unsigned int window_height = 480;
 
 SDL_Color white = {255, 255, 255, 255};
 
+void exit_cmacs(void) {
+    cmacs_running = false;
+}
+
+static SDL_HitTestResult hit_test_callback(SDL_Window *window, const SDL_Point *pixel, void *data)
+{
+    // Top left box.
+    if (pixel->y < 20 && pixel->x < 20) {
+        return SDL_HITTEST_RESIZE_TOPLEFT;
+    }
+
+    // No top right box.
+
+    // Bottom left box.
+    if (pixel->y > (int)window_height - 20 && pixel->x < 20) {
+        return SDL_HITTEST_RESIZE_BOTTOMLEFT;
+    }
+
+    // Bottom right box.
+    if (pixel->y > (int)window_height - 20 && pixel->x > (int)window_width - 20) {
+        return SDL_HITTEST_RESIZE_BOTTOMRIGHT;
+    }
+    
+    // Top side.
+    if (pixel->y < 4) {
+        return SDL_HITTEST_RESIZE_TOP;
+    }
+
+    // Top bar drags window position.
+    if (pixel->y < 27 && pixel->x < (int)window_width - 101) {
+        return SDL_HITTEST_DRAGGABLE;
+    }
+
+    // Bottom side.
+    if (pixel->y > (int)window_height - 12) {
+        return SDL_HITTEST_RESIZE_BOTTOM;
+    }
+
+    // Right side.
+    if (pixel->x > (int)window_width - 12 && pixel->y > 27) {
+        return SDL_HITTEST_RESIZE_RIGHT;
+    }
+
+    // Left side.
+    if (pixel->x < 12) {
+        return SDL_HITTEST_RESIZE_LEFT;
+    }
+
+    return SDL_HITTEST_NORMAL;
+}
+
 static SDL_Window *init_sdl2_window(void)
 {
     // Initialise SDL.
@@ -44,6 +95,11 @@ static SDL_Window *init_sdl2_window(void)
         SDL_Quit();
         return NULL;
     }
+
+    // Set window borderless and setup hit testing for custom border.
+    void *hit_test_data = NULL;
+    SDL_SetWindowBordered(window, SDL_FALSE);
+    SDL_SetWindowHitTest(window, hit_test_callback, hit_test_data);
 
     return window;
 }
@@ -90,6 +146,43 @@ int main(int argc, char *args[])
         return -1;
     }
 
+
+    Label *title = Label_Create(renderer, 6, 1, window_title, fonts.font_regular_bold, white, 0, 0, 0);
+
+    // These button icons and sizes are really hacked together :/
+    Button *minimise_btn = Button_Create(renderer, window_width - 101, 2, "A", fonts.font_regular, white, 10, 0, NULL);
+    minimise_btn->text_texture = textures.min_icon;
+    minimise_btn->text_rect.y += 13;
+    minimise_btn->text_rect.h -= 18;
+
+    Button *maximise_btn = Button_Create(renderer, window_width - 67, 2, "A", fonts.font_regular, white, 10, 0, NULL);
+    maximise_btn->text_texture = textures.max_icon;
+    maximise_btn->text_rect.y += 6;
+    maximise_btn->text_rect.h -= 10;
+
+    Button *exit_btn = Button_Create(renderer, window_width - 33, 2, "A", fonts.font_regular, white, 10, 0, exit_cmacs);
+    exit_btn->text_texture = textures.exit_icon;
+    exit_btn->text_rect.y += 5;
+    exit_btn->text_rect.h = 13;
+    exit_btn->text_rect.x -= 2;
+    exit_btn->text_rect.w = 14;
+    exit_btn->background_texture = textures.red_label_background;
+
+    // Setup title bar, border.
+    SDL_Rect title_bar_rect = {0};
+    title_bar_rect.w = window_width;
+    title_bar_rect.h = 27;
+    
+    SDL_Rect border_rect = {0};
+    border_rect.w = window_width;
+    border_rect.h = window_height;
+
+    SDL_Rect s_border_rect = {0};
+    s_border_rect.x = 1;
+    s_border_rect.y = 1;
+    s_border_rect.w = window_width - 2;
+    s_border_rect.h = window_height - 2;
+
     // Tagline text.
     Label *tagline = Label_Create(renderer, 0, 0,
         "Inoperable project to make Emacs with a better paradigm.", 
@@ -111,17 +204,17 @@ int main(int argc, char *args[])
     SDL_Texture *logo_image = SDL_CreateTextureFromSurface(renderer, logo_image_surface);
     SDL_FreeSurface(logo_image_surface);
 
-    Label *new_label = Label_Create(renderer, 20, 20, "Hello Labels.", fonts.font_regular, white, 1, 10, 1);
-    Label *test_label = Label_Create(renderer, 200, 20, "Testing Label 2", fonts.font_regular, white, 1, 10, 1);
+    Label *new_label = Label_Create(renderer, 20, 40, "Hello Labels.", fonts.font_regular, white, 1, 10, 1);
+    Label *test_label = Label_Create(renderer, 200, 40, "Testing Label 2", fonts.font_regular, white, 1, 10, 1);
 
-    Button *new_button = Button_Create(renderer, 20, 55, "Hello Buttons.", fonts.font_regular, white, 10, 1, NULL);
+    Button *new_button = Button_Create(renderer, 20, 75, "Hello Buttons.", fonts.font_regular, white, 10, 1, NULL);
 
-    Button *new_button1 = Button_Create(renderer, 20, 100, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button2 = Button_Create(renderer, 20, 130, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button3 = Button_Create(renderer, 20, 160, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button4 = Button_Create(renderer, 20, 190, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button5 = Button_Create(renderer, 20, 220, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button6 = Button_Create(renderer, 20, 250, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
+    Button *new_button1 = Button_Create(renderer, 20, 120, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
+    Button *new_button2 = Button_Create(renderer, 20, 150, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
+    Button *new_button3 = Button_Create(renderer, 20, 180, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
+    Button *new_button4 = Button_Create(renderer, 20, 210, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
+    Button *new_button5 = Button_Create(renderer, 20, 240, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
+    Button *new_button6 = Button_Create(renderer, 20, 270, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
 
     SDL_Event event;
     while (cmacs_running) {
@@ -176,6 +269,26 @@ int main(int argc, char *args[])
                         logo_rect.x = window_width / 2 - (logo_rect.w / 2);
                         logo_rect.y = window_height / 2 - (logo_rect.h / 2) - 40;
 
+                        // Update title bar and border.
+                        title_bar_rect.w = window_width;
+                        
+                        border_rect.w = window_width;
+                        border_rect.h = window_height;
+
+                        s_border_rect.w = window_width - 2;
+                        s_border_rect.h = window_height - 2;
+
+                        // Update title bar buttons.
+                        Button_SetPos(minimise_btn, window_width - 101, 2);
+                        minimise_btn->text_rect.y += 13;
+
+                        Button_SetPos(maximise_btn, window_width - 67, 2);
+                        maximise_btn->text_rect.y += 6;
+
+                        Button_SetPos(exit_btn, window_width - 33, 2);
+                        exit_btn->text_rect.y += 5;
+                        exit_btn->text_rect.x -= 2;
+
                         break;
                 }
             }
@@ -185,11 +298,18 @@ int main(int argc, char *args[])
         SDL_SetRenderDrawColor(renderer, 40, 40, 45, 255);
         SDL_RenderClear(renderer);
         
+        // Title Bar
+        SDL_SetRenderDrawColor(renderer, 70, 70, 85, 255);
+        SDL_RenderFillRect(renderer, &title_bar_rect);
+        // Window Border
+        SDL_RenderDrawRect(renderer, &border_rect);
+        SDL_RenderDrawRect(renderer, &s_border_rect);
+
         SDL_RenderCopy(renderer, logo_image, NULL, &logo_rect);
 
         Label_RenderCopy_AllLabels(renderer);
         Button_RenderCopy_AllButtons(renderer);
-        
+
         // Present frame.
         SDL_RenderPresent(renderer);
         SDL_Delay(1000/60);
