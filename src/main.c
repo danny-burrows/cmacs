@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -9,6 +10,7 @@
 #include "ui/label.h"
 #include "ui/button.h"
 
+static bool         cmacs_running = true;
 static char        *window_title  = "cmacs";
 static unsigned int window_width  = 640;
 static unsigned int window_height = 480;
@@ -122,7 +124,7 @@ int main(int argc, char *args[])
     Button *new_button6 = Button_Create(renderer, 20, 250, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
 
     SDL_Event event;
-    while (1) {
+    while (cmacs_running) {
 
         // Process events.
         while (SDL_PollEvent(&event)) {
@@ -135,7 +137,7 @@ int main(int argc, char *args[])
                     switch(event.key.keysym.scancode) {
                         case SDL_SCANCODE_Q:
                         case SDL_SCANCODE_ESCAPE:
-                        return 0;
+                        cmacs_running = false;
                         default:
                         break;
                     }
@@ -192,5 +194,11 @@ int main(int argc, char *args[])
         SDL_RenderPresent(renderer);
         SDL_Delay(1000/60);
     }
+
+    // Graceful exit.
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
     return 0;
 }
