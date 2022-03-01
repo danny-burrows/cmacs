@@ -48,6 +48,25 @@ static SDL_Window *init_sdl2_window(void)
     return window;
 }
 
+void type_char(char *buffer, char new_char, int index) {
+    char *c = &buffer[index];
+    char current = new_char;
+    char next = buffer[index];
+
+    for (; *c; c++) {
+        *c = current;
+        current = next;
+        next = *(c + 1);
+    }
+    *c = current;
+}
+
+void rem_char(char *buffer, int index) {
+    for (char *c = &buffer[index]; *c; c++) {
+        *c = *(c + 1);
+    }
+}
+
 
 // SDL Requires this exact signature for cross platform.
 int main(int argc, char *args[]) 
@@ -123,24 +142,73 @@ int main(int argc, char *args[])
     Button *new_button5 = Button_Create(renderer, 20, 220, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
     Button *new_button6 = Button_Create(renderer, 20, 250, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
 
+    SDL_StartTextInput();
+    char text_buffer[2048] = "";
+    int string_len = 0;
+    int cursor = 0;
+
+    SDL_Surface *text_buffer_surface = NULL;
+    SDL_Texture *text_buffer_texture = NULL;
+    SDL_Rect type_text_rect = {0};
+
     SDL_Event event;
     while (cmacs_running) {
+
+        bool render_text = false;
 
         // Process events.
         while (SDL_PollEvent(&event)) {
 
             switch (event.type) {
                 case SDL_QUIT:
-                    return 1;
+                    cmacs_running = false;
+                    break;
 
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.scancode) {
+                        case SDL_SCANCODE_RETURN:
+                            if ((long unsigned int)string_len > sizeof(text_buffer) - 2) break;
+                            type_char(text_buffer, '\n', cursor);
+                            cursor++;
+                            string_len++;
+                            render_text = true;
+                            break;
+                        case SDL_SCANCODE_BACKSPACE:
+                            if (cursor < 1) break;
+                            cursor--;
+                            string_len--;
+
+                            rem_char(text_buffer, cursor);
+
+                            render_text = true;
+                            break;
+                        case SDL_SCANCODE_LEFT:
+                            if (cursor < 1) break;
+                            cursor--;
+                            break;
+                        case SDL_SCANCODE_RIGHT:
+                            if ((long unsigned int)cursor > sizeof(text_buffer) - 2 || text_buffer[cursor] == '\0') break;
+                            cursor++;
+                            break;
+                        
                         case SDL_SCANCODE_Q:
                         case SDL_SCANCODE_ESCAPE:
-                        cmacs_running = false;
+                            cmacs_running = false;
                         default:
                         break;
                     }
+                    break;
+
+                case SDL_TEXTINPUT:
+                    if ((long unsigned int)string_len > sizeof(text_buffer) - 2) break;
+
+                    // This will cause problems for bigger chars. Will need to handle SDL_TEXTEDITNG
+                    //                                     |
+                    type_char(text_buffer, event.text.text[0], cursor);
+                    
+                    cursor++;
+                    string_len++;
+                    render_text = true;
                     break;
 
                 case SDL_MOUSEMOTION:
@@ -176,6 +244,7 @@ int main(int argc, char *args[])
                         logo_rect.x = window_width / 2 - (logo_rect.w / 2);
                         logo_rect.y = window_height / 2 - (logo_rect.h / 2) - 40;
 
+                        render_text = true;
                         break;
                 }
             }
@@ -185,6 +254,28 @@ int main(int argc, char *args[])
         SDL_SetRenderDrawColor(renderer, 40, 40, 45, 255);
         SDL_RenderClear(renderer);
         
+        if (render_text && strlen(text_buffer) > 0) {
+            printf("Cursor: %d\nText: %s\n", cursor, text_buffer);
+
+            SDL_DestroyTexture(text_buffer_texture);
+
+            text_buffer_surface = TTF_RenderText_Blended_Wrapped(
+                fonts.font_mono_regular, 
+                text_buffer, 
+                white,
+                window_width-10
+            );
+
+            type_text_rect.w = text_buffer_surface->w;
+            type_text_rect.h = text_buffer_surface->h;
+
+            text_buffer_texture = SDL_CreateTextureFromSurface(renderer, text_buffer_surface);
+            SDL_FreeSurface(text_buffer_surface);
+        }
+        if (strlen(text_buffer) > 0) SDL_RenderCopy(renderer, text_buffer_texture, NULL, &type_text_rect);
+        
+        SDL_SetRenderDrawColor(renderer, 225, 225, 245, 255);
+
         SDL_RenderCopy(renderer, logo_image, NULL, &logo_rect);
 
         Label_RenderCopy_AllLabels(renderer);
