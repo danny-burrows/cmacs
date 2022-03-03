@@ -3,3 +3,6 @@
 
 # Target Executable
 cmacs
+
+# Objs
+obj/
