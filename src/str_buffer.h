@@ -5,13 +5,18 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef struct {
+typedef struct _StrBuffer {
     unsigned int buff_size;
     unsigned int str_length;
     char *data;
+
+    struct _StrBuffer *next;
+    struct _StrBuffer *prev;
 } StrBuffer;
 
 StrBuffer *StrBuffer_Create(unsigned int init_length);
+
+// StrBuffer_AppendChar
 
 int StrBuffer_AddChar(StrBuffer *str_buffer, char character, int position);
 
