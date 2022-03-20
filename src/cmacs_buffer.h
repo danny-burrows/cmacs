@@ -25,6 +25,10 @@ int CmacsBuffer_AddLine(CmacsBuffer *buffer);
 
 int CmacsBuffer_RemoveLine(CmacsBuffer *buffer);
 
+int CmacsBuffer_UpLine(CmacsBuffer *buffer);
+
+int CmacsBuffer_DownLine(CmacsBuffer *buffer);
+
 void CmacsBuffer_Destroy(CmacsBuffer *buffer);
 
 #endif

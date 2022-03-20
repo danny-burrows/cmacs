@@ -43,8 +43,8 @@ int CmacsBuffer_AddLine(CmacsBuffer *buffer)
     return 0;
 }
 
-int CmacsBuffer_RemoveLine(CmacsBuffer *buffer) {
-
+int CmacsBuffer_RemoveLine(CmacsBuffer *buffer)
+{
     // Add null and < 0 checks.
 
     if (buffer->current_line->prev)
@@ -61,7 +61,30 @@ int CmacsBuffer_RemoveLine(CmacsBuffer *buffer) {
     return 0;
 }
 
-void CmacsBuffer_Destroy(CmacsBuffer *buffer) {
+int CmacsBuffer_UpLine(CmacsBuffer *buffer)
+{
+    if (buffer->current_line && buffer->current_line->prev) {
+        buffer->current_line = buffer->current_line->prev;
+        buffer->cursor.line--;
+    }
+
+    buffer->cursor.column = buffer->current_line->str_length; // Improvments needed. 
+    return 0;                          
+}
+
+int CmacsBuffer_DownLine(CmacsBuffer *buffer)
+{
+    if (buffer->current_line && buffer->current_line->next) {
+        buffer->current_line = buffer->current_line->next;
+        buffer->cursor.line++;
+    }
+
+    buffer->cursor.column = buffer->current_line->str_length; // Improments needed.                 
+    return 0;
+}
+
+void CmacsBuffer_Destroy(CmacsBuffer *buffer)
+{
     // NEED TO: While through and free all lines!
 
     free(buffer);

@@ -157,21 +157,11 @@ int main(int argc, char *args[])
                             render_text = true;
                             break;
                         case SDL_SCANCODE_UP:
-                            if (cmacs_buffer->current_line && cmacs_buffer->current_line->prev) {
-                                cmacs_buffer->current_line = cmacs_buffer->current_line->prev;
-                                cmacs_buffer->cursor.line--;
-                            }
-
-                            cmacs_buffer->cursor.column = cmacs_buffer->current_line->str_length; // Improvments needed.
+                            CmacsBuffer_UpLine(cmacs_buffer);
                             render_text = true;
                             break;
                         case SDL_SCANCODE_DOWN:
-                            if (cmacs_buffer->current_line && cmacs_buffer->current_line->next) {
-                                cmacs_buffer->current_line = cmacs_buffer->current_line->next;
-                                cmacs_buffer->cursor.line++;
-                            }
-
-                            cmacs_buffer->cursor.column = cmacs_buffer->current_line->str_length; // Improments needed.
+                            CmacsBuffer_DownLine(cmacs_buffer);
                             render_text = true;
                             break;
                         case SDL_SCANCODE_BACKSPACE:
