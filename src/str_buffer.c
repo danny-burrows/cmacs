@@ -49,6 +49,33 @@ int StrBuffer_RemoveChar(StrBuffer *str_buffer, int position) {
     return 0;
 }
 
+int StrBuffer_CopyAndAppendContents(StrBuffer *source, StrBuffer *dest, int start_position) {
+    if (source->str_length == 0) return -1;
+
+    char *c = &source->data[start_position];
+    for (unsigned int i = start_position; i < source->str_length; i++) {
+        StrBuffer_AddChar(dest, *c, dest->str_length);
+        c++;
+    }
+    return 0;
+}
+
+int StrBuffer_MoveAndAppendContents(StrBuffer *source, StrBuffer *dest, int start_position) {
+    if (source->str_length == 0) return -1;
+
+    char *c = &source->data[start_position];
+    for (unsigned int i = start_position; i < source->str_length; i++) {
+        StrBuffer_AddChar(dest, *c, dest->str_length);
+
+        // Cleaning up for move...
+        *c = '\0';
+        
+        c++;
+    }
+    source->str_length = start_position;
+    return 0;
+}
+
 void StrBuffer_Destroy(StrBuffer *str_buffer) {
     free(str_buffer->data);
     free(str_buffer);

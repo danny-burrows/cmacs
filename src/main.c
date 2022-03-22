@@ -158,7 +158,14 @@ int main(int argc, char *args[])
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.scancode) {
                         case SDL_SCANCODE_RETURN:
+
+                            int pullforward = cmacs_buffer->cursor.column;
+                            int new_cursor_col = cmacs_buffer->current_line->str_length - cmacs_buffer->cursor.column;
+
                             CmacsBuffer_AddLine(cmacs_buffer);
+
+                            // Push remaining contents onto next line.
+                            StrBuffer_MoveAndAppendContents(cmacs_buffer->current_line->prev, cmacs_buffer->current_line, pullforward);
                             break;
                         case SDL_SCANCODE_UP:
                             CmacsBuffer_UpLine(cmacs_buffer);
@@ -166,10 +173,23 @@ int main(int argc, char *args[])
                         case SDL_SCANCODE_DOWN:
                             CmacsBuffer_DownLine(cmacs_buffer);
                             break;
+                        case SDL_SCANCODE_TAB:
+                            // Tab-width of 4 spaces...
+                            for (int i = 0; i < 4; i++) {
+                                StrBuffer_AddChar(cmacs_buffer->current_line, ' ', cmacs_buffer->cursor.column);
+                                cmacs_buffer->cursor.column++;
+                            }
+                            break;
                         case SDL_SCANCODE_BACKSPACE:
                             if (cmacs_buffer->cursor.column < 1) {
                                 if (!cmacs_buffer->current_line->prev) break;
+
+                                // Pull remaining contents onto prev line.
+                                StrBuffer_CopyAndAppendContents(cmacs_buffer->current_line, cmacs_buffer->current_line->prev, 0);
+                                
+                                int pushback = cmacs_buffer->current_line->str_length - cmacs_buffer->cursor.column;
                                 CmacsBuffer_RemoveLine(cmacs_buffer);
+                                cmacs_buffer->cursor.column -= pushback;
                                 break;
                             } else {
                                 cmacs_buffer->cursor.column--;
@@ -295,6 +315,11 @@ int main(int argc, char *args[])
                     line->data,
                     white
                 );
+
+                if (!text_buffer_surface) {
+                    SDL_LogError(0, "Failed to compile 'text_buffer_surface'!");
+                    return -1;
+                }
 
                 type_text_rect.x = 50;
                 type_text_rect.w = text_buffer_surface->w;

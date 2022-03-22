@@ -22,6 +22,10 @@ int StrBuffer_AddChar(StrBuffer *str_buffer, char character, int position);
 
 int StrBuffer_RemoveChar(StrBuffer *str_buffer, int position);
 
+int StrBuffer_CopyAndAppendContents(StrBuffer *source, StrBuffer *dest, int start_position);
+
+int StrBuffer_MoveAndAppendContents(StrBuffer *source, StrBuffer *dest, int start_position);
+
 void StrBuffer_Destroy(StrBuffer *str_buffer);
 
 #endif
