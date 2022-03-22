@@ -122,30 +122,30 @@ int main(int argc, char *args[])
     SDL_Texture *logo_image = SDL_CreateTextureFromSurface(renderer, logo_image_surface);
     SDL_FreeSurface(logo_image_surface);
 
-    Label *new_label = Label_Create(renderer, 500, 20, "Hello Labels.", fonts.font_regular, white, 1, 10, 1);
-    Label *test_label = Label_Create(renderer, 200, 20, "Testing Label 2", fonts.font_regular, white, 1, 10, 1);
-
-    Button *new_button = Button_Create(renderer, 500, 55, "Hello Buttons.", fonts.font_regular, white, 10, 1, NULL);
-
-    Button *new_button1 = Button_Create(renderer, 500, 100, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button2 = Button_Create(renderer, 500, 130, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button3 = Button_Create(renderer, 500, 160, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button4 = Button_Create(renderer, 500, 190, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button5 = Button_Create(renderer, 500, 220, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button6 = Button_Create(renderer, 500, 250, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
+    Label *test_label = Label_Create(renderer, window_width - 135, 15, "Testing Label", fonts.font_regular, white, 1, 10, 1);
+    Button *test_button_list[8] = {0};
+    for (int i = 0; i < 8; i++) {
+        test_button_list[i] = Button_Create(renderer, window_width - 135, 45 + i * 30, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
+    }
 
     CmacsBuffer *cmacs_buffer = CmacsBuffer_Create();
 
     SDL_Surface *text_buffer_surface = NULL;
     SDL_Texture *text_buffer_texture = NULL;
-    SDL_Rect type_text_rect;
+    SDL_Rect type_text_rect = {0};
+
+    char line_num_buffer[LINE_NUM_BUFFSIZE];
+    SDL_Texture *line_num_texture = NULL;
+    SDL_Surface *line_num_surface = NULL;
+
+    SDL_Rect cursor_rect = {
+        0, 0, 9, 20,
+    };
 
     SDL_StartTextInput();
 
     SDL_Event event;
     while (cmacs_running) {
-
-        bool render_text = false;
 
         // Process events.
         while (SDL_PollEvent(&event)) {
@@ -159,15 +159,12 @@ int main(int argc, char *args[])
                     switch(event.key.keysym.scancode) {
                         case SDL_SCANCODE_RETURN:
                             CmacsBuffer_AddLine(cmacs_buffer);
-                            render_text = true;
                             break;
                         case SDL_SCANCODE_UP:
                             CmacsBuffer_UpLine(cmacs_buffer);
-                            render_text = true;
                             break;
                         case SDL_SCANCODE_DOWN:
                             CmacsBuffer_DownLine(cmacs_buffer);
-                            render_text = true;
                             break;
                         case SDL_SCANCODE_BACKSPACE:
                             if (cmacs_buffer->cursor.column < 1) {
@@ -177,9 +174,7 @@ int main(int argc, char *args[])
                             } else {
                                 cmacs_buffer->cursor.column--;
                             };
-
                             StrBuffer_RemoveChar(cmacs_buffer->current_line, cmacs_buffer->cursor.column);
-                            render_text = true;
                             break;
                         case SDL_SCANCODE_LEFT:
                             if (cmacs_buffer->cursor.column < 1) {
@@ -218,9 +213,7 @@ int main(int argc, char *args[])
                     // This will cause problems for bigger chars. Will need to handle SDL_TEXTEDITNG
                     //                                                   |
                     StrBuffer_AddChar(cmacs_buffer->current_line, event.text.text[0], cmacs_buffer->cursor.column);
-                    
                     cmacs_buffer->cursor.column++;
-                    render_text = true;
                     break;
 
                 case SDL_MOUSEMOTION:
@@ -228,15 +221,13 @@ int main(int argc, char *args[])
                     break;
 
                 case SDL_MOUSEBUTTONDOWN:
-                    if (event.button.button == SDL_BUTTON_LEFT) {
-                        Button_CallFor_AllButtons(Button_PressCheck);            
-                    }
+                    if (event.button.button == SDL_BUTTON_LEFT)
+                        Button_CallFor_AllButtons(Button_PressCheck);
                     break;
 
                 case SDL_MOUSEBUTTONUP:    
-                    if (event.button.button == SDL_BUTTON_LEFT) {
+                    if (event.button.button == SDL_BUTTON_LEFT)
                         Button_CallFor_AllButtons(Button_ReleaseCheck);
-                    }
                     break;
             }
 
@@ -246,17 +237,21 @@ int main(int argc, char *args[])
                         window_width = event.window.data1; 
                         window_height = event.window.data2;
 
-                        // Calc text position.
+                        // Calc logo position.
+                        logo_rect.x = window_width / 2 - (logo_rect.w / 2);
+                        logo_rect.y = window_height / 2 - (logo_rect.h / 2) - 40;
+
+                        // Calc tagline position.
                         Label_SetPos(tagline, 
                             window_width / 2 - (tagline->rect.w / 2),
                             window_height / 2 - (tagline->rect.h / 2) + 115
                         );
 
-                        // Calc logo position.
-                        logo_rect.x = window_width / 2 - (logo_rect.w / 2);
-                        logo_rect.y = window_height / 2 - (logo_rect.h / 2) - 40;
-
-                        render_text = true;
+                        // Update label & buttons.
+                        Label_SetPos(test_label, window_width - 135, test_label->rect.y);
+                        for (int i = 0; i < 8; i++) {
+                            Button_SetPos(test_button_list[i], window_width - 135, test_button_list[i]->rect.y);
+                        }
                         break;
                 }
             }
@@ -265,20 +260,12 @@ int main(int argc, char *args[])
         // Clear screen.
         SDL_SetRenderDrawColor(renderer, 40, 40, 45, 255);
         SDL_RenderClear(renderer);
-        
-        char line_num_buffer[LINE_NUM_BUFFSIZE];
-
-        SDL_Texture *line_num_texture = NULL;
-        SDL_Surface *line_num_surface = NULL;
-
-        SDL_Rect cursor_rect = {
-            0, 0, 9, 20,
-        };
 
         int i = 0;
         StrBuffer *line = cmacs_buffer->head;
         while (line) {
             
+            // Draw line number...
             if (line_num_texture) SDL_DestroyTexture(line_num_texture);
 
             sprintf(line_num_buffer, "%d", i + 1);
@@ -299,7 +286,7 @@ int main(int argc, char *args[])
             type_text_rect.w = line_num_surface->w;
             SDL_RenderCopy(renderer, line_num_texture, NULL, &type_text_rect);
 
-            // Render line text
+            // Draw line text...
             if (line->str_length) {
                 SDL_DestroyTexture(text_buffer_texture);
 
@@ -320,21 +307,15 @@ int main(int argc, char *args[])
             type_text_rect.x = 0;
             type_text_rect.y = 0;
 
-            //Cursor
-            if (cmacs_buffer->cursor.line == i) {
-                cursor_rect.x = (cmacs_buffer->cursor.column * 9) + 50;
-                cursor_rect.y = i * (type_text_rect.h + 2);
-
-                SDL_SetRenderDrawColor(renderer, 225, 225, 255, 90);
-                
-                SDL_RenderFillRect(renderer, &cursor_rect);
-            }
-            
             line = line->next;
             i++;
         }
 
-        SDL_SetRenderDrawColor(renderer, 225, 225, 245, 255);
+        // Draw Cursor...
+        cursor_rect.x = (cmacs_buffer->cursor.column * 9) + 50;
+        cursor_rect.y = cmacs_buffer->cursor.line * (type_text_rect.h + 2);
+        SDL_SetRenderDrawColor(renderer, 225, 225, 255, 90);        
+        SDL_RenderFillRect(renderer, &cursor_rect);
 
         SDL_RenderCopy(renderer, logo_image, NULL, &logo_rect);
 
