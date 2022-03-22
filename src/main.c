@@ -268,8 +268,6 @@ int main(int argc, char *args[])
         
         char line_num_buffer[LINE_NUM_BUFFSIZE];
 
-        printf("%d\n", LINE_NUM_BUFFSIZE);
-
         SDL_Texture *line_num_texture = NULL;
         SDL_Surface *line_num_surface = NULL;
 
