@@ -12,6 +12,13 @@
 #include "ui/label.h"
 #include "ui/button.h"
 
+#define MAX_LINES   15000
+#define MAX_COLUMNS 100000
+
+#define STRINGIFY(i) #i
+#define DIGITS(i) (sizeof(STRINGIFY(i)) - 1) // (-1 for \0)
+#define LINE_NUM_BUFFSIZE (DIGITS(MAX_LINES) + 1)
+
 static bool         cmacs_running = true;
 static char        *window_title  = "cmacs";
 static unsigned int window_width  = 640;
@@ -152,8 +159,6 @@ int main(int argc, char *args[])
                     switch(event.key.keysym.scancode) {
                         case SDL_SCANCODE_RETURN:
                             CmacsBuffer_AddLine(cmacs_buffer);
-
-                            cmacs_buffer->cursor.column = cmacs_buffer->current_line->str_length;
                             render_text = true;
                             break;
                         case SDL_SCANCODE_UP:
@@ -167,17 +172,13 @@ int main(int argc, char *args[])
                         case SDL_SCANCODE_BACKSPACE:
                             if (cmacs_buffer->cursor.column < 1) {
                                 if (!cmacs_buffer->current_line->prev) break;
-
                                 CmacsBuffer_RemoveLine(cmacs_buffer);
-
-                                cmacs_buffer->cursor.column = cmacs_buffer->current_line->str_length;
                                 break;
                             } else {
                                 cmacs_buffer->cursor.column--;
                             };
 
                             StrBuffer_RemoveChar(cmacs_buffer->current_line, cmacs_buffer->cursor.column);
-
                             render_text = true;
                             break;
                         case SDL_SCANCODE_LEFT:
@@ -265,7 +266,9 @@ int main(int argc, char *args[])
         SDL_SetRenderDrawColor(renderer, 40, 40, 45, 255);
         SDL_RenderClear(renderer);
         
-        char linenumstr[1024];
+        char line_num_buffer[LINE_NUM_BUFFSIZE];
+
+        printf("%d\n", LINE_NUM_BUFFSIZE);
 
         SDL_Texture *line_num_texture = NULL;
         SDL_Surface *line_num_surface = NULL;
@@ -280,10 +283,10 @@ int main(int argc, char *args[])
             
             if (line_num_texture) SDL_DestroyTexture(line_num_texture);
 
-            sprintf(linenumstr, " %d ", i + 1);
+            sprintf(line_num_buffer, "%d", i + 1);
             line_num_surface = TTF_RenderText_Blended(
                 fonts.font_mono_regular, 
-                linenumstr,
+                line_num_buffer,
                 white
             );
 
@@ -346,9 +349,8 @@ int main(int argc, char *args[])
     }
 
     // Graceful exit.
+    CmacsBuffer_Destroy(cmacs_buffer);
 
-    // Destroy the cmacs buffer!!!!!!!!!!!!!!
-    
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

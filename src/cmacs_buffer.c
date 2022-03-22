@@ -37,7 +37,10 @@ int CmacsBuffer_AddLine(CmacsBuffer *buffer)
     }
 
     buffer->current_line = new_line;
+    
     buffer->cursor.line++;
+    buffer->cursor.column = buffer->current_line->str_length;
+    
     buffer->line_count++;
     
     return 0;
@@ -45,18 +48,22 @@ int CmacsBuffer_AddLine(CmacsBuffer *buffer)
 
 int CmacsBuffer_RemoveLine(CmacsBuffer *buffer)
 {
-    // Add null and < 0 checks.
+    if (!buffer->current_line->prev) return -1;
 
-    if (buffer->current_line->prev)
-        buffer->current_line->prev->next = buffer->current_line->next;
+    buffer->current_line->prev->next = buffer->current_line->next;
 
     if (buffer->current_line->next)
         buffer->current_line->next->prev = buffer->current_line->prev;
 
+    StrBuffer_Destroy(buffer->current_line);
+
     buffer->current_line = buffer->current_line->prev;
 
     buffer->cursor.line--;
+    buffer->cursor.column = buffer->current_line->str_length;
+
     buffer->line_count--;
+
 
     return 0;
 }
@@ -85,7 +92,10 @@ int CmacsBuffer_DownLine(CmacsBuffer *buffer)
 
 void CmacsBuffer_Destroy(CmacsBuffer *buffer)
 {
-    // NEED TO: While through and free all lines!
-
+    buffer->current_line = buffer->head;
+    while (buffer->current_line) {
+        StrBuffer_Destroy(buffer->current_line);
+        buffer->current_line = buffer->current_line->next;
+    }
     free(buffer);
 }
