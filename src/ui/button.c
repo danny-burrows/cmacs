@@ -2,7 +2,8 @@
 
 ButtonRegister button_register;
 
-void default_press_callback(void) {
+void default_press_callback(void)
+{
     SDL_Log("Button Press!\n");
 }
 
@@ -60,7 +61,8 @@ Button *Button_Create(
     return button;
 }
 
-void Button_SetPos(Button *button, int x, int y) {
+void Button_SetPos(Button *button, int x, int y)
+{
     button->rect.x = x;
     button->rect.y = y;
 
@@ -69,7 +71,8 @@ void Button_SetPos(Button *button, int x, int y) {
     button->text_rect.y = button->rect.y + button->pad_y;
 }
 
-void Button_HoverCheck(Button *button, int mouse_x, int mouse_y) {
+void Button_HoverCheck(Button *button, int mouse_x, int mouse_y)
+{
     button->is_hovered = 0;
 
     if (mouse_x > button->rect.x && 
@@ -81,14 +84,16 @@ void Button_HoverCheck(Button *button, int mouse_x, int mouse_y) {
     }
 }
 
-void Button_PressCheck(Button *button) {
+void Button_PressCheck(Button *button)
+{
     if (button->is_hovered) {
         button->is_pressed = 1;
         button->onpress();
     }
 }
 
-void Button_ReleaseCheck(Button *button) {
+void Button_ReleaseCheck(Button *button)
+{
     button->is_pressed = 0;
 }
 
@@ -108,7 +113,8 @@ void Button_RenderCopy(SDL_Renderer *renderer, Button *button)
     SDL_RenderCopy(renderer, button->text_texture, NULL, &button->text_rect);
 }
 
-void Button_Destroy(Button *button) {
+void Button_Destroy(Button *button)
+{
     SDL_DestroyTexture(button->text_texture);
     SDL_DestroyTexture(button->background_texture);
     free(button);
@@ -117,7 +123,8 @@ void Button_Destroy(Button *button) {
 // These functions act on all buttons in the button register...
 
 // Run a callback on all buttons.
-void Button_CallFor_AllButtons(void (*callback)(Button *btn)) {
+void Button_CallFor_AllButtons(void (*callback)(Button *btn))
+{
     Button *btn = button_register.top_button;
     while (btn) {
         callback(btn);
@@ -126,7 +133,8 @@ void Button_CallFor_AllButtons(void (*callback)(Button *btn)) {
 }
 
 // Check hover all buttons.
-void Button_HoverCheck_AllButtons(int mouse_x, int mouse_y) {
+void Button_HoverCheck_AllButtons(int mouse_x, int mouse_y)
+{
     Button *btn = button_register.top_button;
     while (btn) {
         Button_HoverCheck(btn, mouse_x, mouse_y);
@@ -135,7 +143,8 @@ void Button_HoverCheck_AllButtons(int mouse_x, int mouse_y) {
 }
 
 // Render copy all buttons.
-void Button_RenderCopy_AllButtons(SDL_Renderer *renderer) {
+void Button_RenderCopy_AllButtons(SDL_Renderer *renderer)
+{
     Button *btn = button_register.top_button;
     while (btn) {
         Button_RenderCopy(renderer, btn);

@@ -13,13 +13,6 @@
 #include "ui/label.h"
 #include "ui/button.h"
 
-#define MAX_LINES   15000
-#define MAX_COLUMNS 100000
-
-#define STRINGIFY(i) #i
-#define DIGITS(i) (sizeof(STRINGIFY(i)) - 1) // (-1 for \0)
-#define LINE_NUM_BUFFSIZE (DIGITS(MAX_LINES) + 1)
-
 static bool         cmacs_running = true;
 static char        *window_title  = "cmacs";
 static unsigned int window_width  = 640;

@@ -7,6 +7,8 @@
 #include "textures.h"
 #include "cmacs_buffer.h"
 
+#define MAX_LINES 15000
+
 struct cursor {
     unsigned int line;
     unsigned int column;

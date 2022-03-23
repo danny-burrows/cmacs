@@ -2,8 +2,8 @@
 
 Textures textures;
 
-int load_textures(SDL_Renderer *renderer) {
-    
+int load_textures(SDL_Renderer *renderer)
+{    
     SDL_Surface *label_background_surface = IMG_Load("assets/ui/label-background.svg");
     textures.label_background = SDL_CreateTextureFromSurface(renderer, label_background_surface);
     SDL_FreeSurface(label_background_surface);

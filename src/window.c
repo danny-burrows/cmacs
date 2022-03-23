@@ -13,6 +13,8 @@ int Window_NewLine(Window *window)
 {
     CmacsBuffer *buff = window->buffer;
 
+    if (buff->line_count >= MAX_LINES) return -1;
+
     CmacsBuffer_InsertLine(buff);
     StrBuffer_MoveAndAppendContents(buff->current_line->prev, buff->current_line, window->cursor.column);
 
@@ -28,7 +30,6 @@ int Window_RemoveLine(Window *window)
     int bytes_copied = 0;
     if (buff->current_line->prev)
         bytes_copied = StrBuffer_CopyAndAppendContents(buff->current_line, buff->current_line->prev, 0);
-    printf("%d\n", bytes_copied);
     
     CmacsBuffer_RemoveLine(buff);
     
@@ -100,7 +101,7 @@ static SDL_Surface *text_buffer_surface = NULL;
 static SDL_Texture *text_buffer_texture = NULL;
 static SDL_Rect type_text_rect = {0};
 
-
+// 11 to allow space for MAXINT digits...
 static char line_num_buffer[11];
 static SDL_Texture *line_num_texture = NULL;
 static SDL_Surface *line_num_surface = NULL;
@@ -180,7 +181,8 @@ int Window_Render(Window *window, SDL_Renderer *renderer)
     return 0;
 }
 
-void Window_Destroy(Window *window) {
+void Window_Destroy(Window *window)
+{
     CmacsBuffer_Destroy(window->buffer);
     free(window);
 }
