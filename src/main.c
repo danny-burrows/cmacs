@@ -164,12 +164,12 @@ int main(int argc, char *args[])
                             break;
                         case SDL_SCANCODE_BACKSPACE:
                             if (text_window->cursor.column < 1) {
+                                if (text_window->cursor.line < 1) break;
                                 Window_RemoveLine(text_window);
-                                break;
                             } else {
                                 text_window->cursor.column--;
+                                StrBuffer_RemoveChar(text_window->buffer->current_line, text_window->cursor.column);
                             };
-                            StrBuffer_RemoveChar(text_window->buffer->current_line, text_window->cursor.column);
                             break;
                         case SDL_SCANCODE_LEFT:
                             Window_CursorLeft(text_window);

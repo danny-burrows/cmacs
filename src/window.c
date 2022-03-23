@@ -14,10 +14,10 @@ int Window_NewLine(Window *window)
     CmacsBuffer *buff = window->buffer;
 
     CmacsBuffer_InsertLine(buff);
-    int bytes_moved = StrBuffer_MoveAndAppendContents(buff->current_line->prev, buff->current_line, window->cursor.column);
+    StrBuffer_MoveAndAppendContents(buff->current_line->prev, buff->current_line, window->cursor.column);
 
     window->cursor.line++;
-    window->cursor.column = bytes_moved;
+    window->cursor.column = 0;
     return 0;
 }
 
@@ -28,6 +28,7 @@ int Window_RemoveLine(Window *window)
     int bytes_copied = 0;
     if (buff->current_line->prev)
         bytes_copied = StrBuffer_CopyAndAppendContents(buff->current_line, buff->current_line->prev, 0);
+    printf("%d\n", bytes_copied);
     
     CmacsBuffer_RemoveLine(buff);
     
