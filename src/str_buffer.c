@@ -49,7 +49,11 @@ int StrBuffer_RemoveChar(StrBuffer *str_buffer, int position) {
     return 0;
 }
 
+// Returns number of bytes copied.
 int StrBuffer_CopyAndAppendContents(StrBuffer *source, StrBuffer *dest, int start_position) {
+
+    // NOTE: Needs some error checking.
+
     if (source->str_length == 0) return -1;
 
     char *c = &source->data[start_position];
@@ -57,10 +61,15 @@ int StrBuffer_CopyAndAppendContents(StrBuffer *source, StrBuffer *dest, int star
         StrBuffer_AddChar(dest, *c, dest->str_length);
         c++;
     }
-    return 0;
+    int r = source->str_length - start_position;
+    return r;
 }
 
+// Returns number of bytes Moved.
 int StrBuffer_MoveAndAppendContents(StrBuffer *source, StrBuffer *dest, int start_position) {
+    
+    // NOTE: Needs some error checking.
+
     if (source->str_length == 0) return -1;
 
     char *c = &source->data[start_position];
@@ -72,8 +81,9 @@ int StrBuffer_MoveAndAppendContents(StrBuffer *source, StrBuffer *dest, int star
         
         c++;
     }
+    int r = source->str_length - start_position;
     source->str_length = start_position;
-    return 0;
+    return r;
 }
 
 void StrBuffer_Destroy(StrBuffer *str_buffer) {

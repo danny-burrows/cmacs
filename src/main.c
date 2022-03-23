@@ -6,6 +6,7 @@
 #include <SDL2/SDL_events.h>
 
 #include "fonts.h"
+#include "window.h"
 #include "textures.h"
 #include "str_buffer.h"
 #include "cmacs_buffer.h"
@@ -128,19 +129,7 @@ int main(int argc, char *args[])
         test_button_list[i] = Button_Create(renderer, window_width - 135, 45 + i * 30, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
     }
 
-    CmacsBuffer *cmacs_buffer = CmacsBuffer_Create();
-
-    SDL_Surface *text_buffer_surface = NULL;
-    SDL_Texture *text_buffer_texture = NULL;
-    SDL_Rect type_text_rect = {0};
-
-    char line_num_buffer[LINE_NUM_BUFFSIZE];
-    SDL_Texture *line_num_texture = NULL;
-    SDL_Surface *line_num_surface = NULL;
-
-    SDL_Rect cursor_rect = {
-        0, 0, 9, 20,
-    };
+    Window *text_window = Window_Create();
 
     SDL_StartTextInput();
 
@@ -158,67 +147,35 @@ int main(int argc, char *args[])
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.scancode) {
                         case SDL_SCANCODE_RETURN:
-
-                            int pullforward = cmacs_buffer->cursor.column;
-                            int new_cursor_col = cmacs_buffer->current_line->str_length - cmacs_buffer->cursor.column;
-
-                            CmacsBuffer_AddLine(cmacs_buffer);
-
-                            // Push remaining contents onto next line.
-                            StrBuffer_MoveAndAppendContents(cmacs_buffer->current_line->prev, cmacs_buffer->current_line, pullforward);
+                            Window_NewLine(text_window);
                             break;
                         case SDL_SCANCODE_UP:
-                            CmacsBuffer_UpLine(cmacs_buffer);
+                            Window_CursorUp(text_window);
                             break;
                         case SDL_SCANCODE_DOWN:
-                            CmacsBuffer_DownLine(cmacs_buffer);
+                            Window_CursorDown(text_window);
                             break;
                         case SDL_SCANCODE_TAB:
                             // Tab-width of 4 spaces...
                             for (int i = 0; i < 4; i++) {
-                                StrBuffer_AddChar(cmacs_buffer->current_line, ' ', cmacs_buffer->cursor.column);
-                                cmacs_buffer->cursor.column++;
+                                StrBuffer_AddChar(text_window->buffer->current_line, ' ', text_window->cursor.column);
+                                text_window->cursor.column++;
                             }
                             break;
                         case SDL_SCANCODE_BACKSPACE:
-                            if (cmacs_buffer->cursor.column < 1) {
-                                if (!cmacs_buffer->current_line->prev) break;
-
-                                // Pull remaining contents onto prev line.
-                                StrBuffer_CopyAndAppendContents(cmacs_buffer->current_line, cmacs_buffer->current_line->prev, 0);
-                                
-                                int pushback = cmacs_buffer->current_line->str_length - cmacs_buffer->cursor.column;
-                                CmacsBuffer_RemoveLine(cmacs_buffer);
-                                cmacs_buffer->cursor.column -= pushback;
+                            if (text_window->cursor.column < 1) {
+                                Window_RemoveLine(text_window);
                                 break;
                             } else {
-                                cmacs_buffer->cursor.column--;
+                                text_window->cursor.column--;
                             };
-                            StrBuffer_RemoveChar(cmacs_buffer->current_line, cmacs_buffer->cursor.column);
+                            StrBuffer_RemoveChar(text_window->buffer->current_line, text_window->cursor.column);
                             break;
                         case SDL_SCANCODE_LEFT:
-                            if (cmacs_buffer->cursor.column < 1) {
-                                if (cmacs_buffer->current_line && cmacs_buffer->current_line->prev) {
-                                    cmacs_buffer->current_line = cmacs_buffer->current_line->prev;
-                                    cmacs_buffer->cursor.line--;
-
-                                    cmacs_buffer->cursor.column = cmacs_buffer->current_line->str_length;
-                                }
-                                break;
-                            }
-                            cmacs_buffer->cursor.column--;
+                            Window_CursorLeft(text_window);
                             break;
                         case SDL_SCANCODE_RIGHT:
-                            if (cmacs_buffer->cursor.column >= cmacs_buffer->current_line->str_length) {
-                                if (cmacs_buffer->current_line && cmacs_buffer->current_line->next) {
-                                    cmacs_buffer->current_line = cmacs_buffer->current_line->next;
-                                    cmacs_buffer->cursor.line++;
-                                    
-                                    cmacs_buffer->cursor.column = 0;
-                                }
-                                break;
-                            };
-                            cmacs_buffer->cursor.column++;
+                            Window_CursorRight(text_window);
                             break;
                         
                         case SDL_SCANCODE_Q:
@@ -232,8 +189,8 @@ int main(int argc, char *args[])
                 case SDL_TEXTINPUT:
                     // This will cause problems for bigger chars. Will need to handle SDL_TEXTEDITNG
                     //                                                   |
-                    StrBuffer_AddChar(cmacs_buffer->current_line, event.text.text[0], cmacs_buffer->cursor.column);
-                    cmacs_buffer->cursor.column++;
+                    StrBuffer_AddChar(text_window->buffer->current_line, event.text.text[0], text_window->cursor.column);
+                    text_window->cursor.column++;
                     break;
 
                 case SDL_MOUSEMOTION:
@@ -281,66 +238,7 @@ int main(int argc, char *args[])
         SDL_SetRenderDrawColor(renderer, 40, 40, 45, 255);
         SDL_RenderClear(renderer);
 
-        int i = 0;
-        StrBuffer *line = cmacs_buffer->head;
-        while (line) {
-            
-            // Draw line number...
-            if (line_num_texture) SDL_DestroyTexture(line_num_texture);
-
-            sprintf(line_num_buffer, "%d", i + 1);
-            line_num_surface = TTF_RenderText_Blended(
-                fonts.font_mono_regular, 
-                line_num_buffer,
-                white
-            );
-
-            line_num_texture = SDL_CreateTextureFromSurface(renderer, line_num_surface);
-            SDL_FreeSurface(line_num_surface);
-
-            type_text_rect.y = i * (line_num_surface->h + 2);
-            type_text_rect.h = line_num_surface->h;
-            
-            type_text_rect.w = 40;
-            SDL_RenderCopy(renderer, textures.label_background, NULL, &type_text_rect);
-            type_text_rect.w = line_num_surface->w;
-            SDL_RenderCopy(renderer, line_num_texture, NULL, &type_text_rect);
-
-            // Draw line text...
-            if (line->str_length) {
-                SDL_DestroyTexture(text_buffer_texture);
-
-                text_buffer_surface = TTF_RenderText_Blended(
-                    fonts.font_mono_regular, 
-                    line->data,
-                    white
-                );
-
-                if (!text_buffer_surface) {
-                    SDL_LogError(0, "Failed to compile 'text_buffer_surface'!");
-                    return -1;
-                }
-
-                type_text_rect.x = 50;
-                type_text_rect.w = text_buffer_surface->w;
-                type_text_rect.h = text_buffer_surface->h;
-
-                text_buffer_texture = SDL_CreateTextureFromSurface(renderer, text_buffer_surface);
-                SDL_FreeSurface(text_buffer_surface);
-                SDL_RenderCopy(renderer, text_buffer_texture, NULL, &type_text_rect);
-            }
-            type_text_rect.x = 0;
-            type_text_rect.y = 0;
-
-            line = line->next;
-            i++;
-        }
-
-        // Draw Cursor...
-        cursor_rect.x = (cmacs_buffer->cursor.column * 9) + 50;
-        cursor_rect.y = cmacs_buffer->cursor.line * (type_text_rect.h + 2);
-        SDL_SetRenderDrawColor(renderer, 225, 225, 255, 90);        
-        SDL_RenderFillRect(renderer, &cursor_rect);
+        Window_Render(text_window, renderer);
 
         SDL_RenderCopy(renderer, logo_image, NULL, &logo_rect);
 
@@ -353,7 +251,7 @@ int main(int argc, char *args[])
     }
 
     // Graceful exit.
-    CmacsBuffer_Destroy(cmacs_buffer);
+    Window_Destroy(text_window);
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

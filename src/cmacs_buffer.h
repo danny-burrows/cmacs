@@ -3,17 +3,10 @@
 
 #include "str_buffer.h"
 
-struct cursor {
-    unsigned int line;
-    unsigned int column;
-};
-
 typedef struct {
     unsigned int line_count;
 
     StrBuffer *current_line;
-
-    struct cursor cursor;
     
     StrBuffer *head;
     StrBuffer *tail;
@@ -21,13 +14,9 @@ typedef struct {
 
 CmacsBuffer *CmacsBuffer_Create(void);
 
-int CmacsBuffer_AddLine(CmacsBuffer *buffer);
+int CmacsBuffer_InsertLine(CmacsBuffer *buffer);
 
 int CmacsBuffer_RemoveLine(CmacsBuffer *buffer);
-
-int CmacsBuffer_UpLine(CmacsBuffer *buffer);
-
-int CmacsBuffer_DownLine(CmacsBuffer *buffer);
 
 void CmacsBuffer_Destroy(CmacsBuffer *buffer);
 
