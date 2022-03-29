@@ -1,5 +1,6 @@
 # Development tools
 .vscode
+.cache
 
 # Target Executable
 cmacs
