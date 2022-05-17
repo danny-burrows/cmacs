@@ -96,6 +96,11 @@ int main(int argc, char *args[])
         return -1;
     }
 
+    if(config_load("cmacs.conf") == -1)
+    {
+	    printf("[WARN] could not load config, using defaults\n");
+    }
+
     // Tagline text.
     Label *tagline = Label_Create(renderer, 0, 0,
         "Inoperable project to make Emacs with a better paradigm.", 

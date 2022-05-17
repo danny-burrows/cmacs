@@ -10,4 +10,6 @@ typedef struct Config_
 
 extern Config globalConfig;
 
+char config_load(char* filepath);
+
 #endif
