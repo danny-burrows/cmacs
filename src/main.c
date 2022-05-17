@@ -12,6 +12,7 @@
 #include "cmacs_buffer.h"
 #include "ui/label.h"
 #include "ui/button.h"
+#include "config.h"
 
 static bool         cmacs_running = true;
 static char        *window_title  = "cmacs";
@@ -150,10 +151,10 @@ int main(int argc, char *args[])
                             break;
                         case SDL_SCANCODE_TAB:
                             // Tab-width of 4 spaces...
-                            for (int i = 0; i < 4; i++) {
+                            for (int i = 0; i < globalConfig.tabwidth; i++) {
                                 StrBuffer_AddChar(text_window->buffer->current_line, ' ', text_window->cursor.column);
                                 text_window->cursor.column++;
-                                if(text_window->cursor.column % 4 == 0)
+                                if(text_window->cursor.column % globalConfig.tabwidth == 0)
 	                                break;
                             }
                             break;
