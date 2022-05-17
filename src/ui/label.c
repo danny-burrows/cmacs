@@ -46,7 +46,8 @@ Label *Label_Create(
     return label;
 }
 
-void Label_SetPos(Label *label, int x, int y) {
+void Label_SetPos(Label *label, int x, int y)
+{
     label->rect.x = x;
     label->rect.y = y;
 
@@ -64,7 +65,8 @@ void Label_RenderCopy(SDL_Renderer *renderer, Label *label)
     SDL_RenderCopy(renderer, label->text_texture, NULL, &label->text_rect);
 }
 
-void Label_Destroy(Label *label) {
+void Label_Destroy(Label *label)
+{
     SDL_DestroyTexture(label->text_texture);
     free(label);
 }
@@ -72,7 +74,8 @@ void Label_Destroy(Label *label) {
 // These functions act on all labels in the label register...
 
 // Run a callback on all labels.
-void Label_CallFor_AllLabels(void (*callback)(Label *lbl)) {
+void Label_CallFor_AllLabels(void (*callback)(Label *lbl))
+{
     Label *lbl = label_register.top_label;
     while (lbl) {
         callback(lbl);
@@ -81,7 +84,8 @@ void Label_CallFor_AllLabels(void (*callback)(Label *lbl)) {
 }
 
 // Render copy all buttons.
-void Label_RenderCopy_AllLabels(SDL_Renderer *renderer) {
+void Label_RenderCopy_AllLabels(SDL_Renderer *renderer)
+{
     Label *lbl = label_register.top_label;
     while (lbl) {
         Label_RenderCopy(renderer, lbl);

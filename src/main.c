@@ -6,7 +6,10 @@
 #include <SDL2/SDL_events.h>
 
 #include "fonts.h"
+#include "window.h"
 #include "textures.h"
+#include "str_buffer.h"
+#include "cmacs_buffer.h"
 #include "ui/label.h"
 #include "ui/button.h"
 
@@ -48,7 +51,6 @@ static SDL_Window *init_sdl2_window(void)
     return window;
 }
 
-
 // SDL Requires this exact signature for cross platform.
 int main(int argc, char *args[]) 
 {
@@ -69,6 +71,9 @@ int main(int argc, char *args[])
         SDL_Quit();
         return -1;
     }
+
+    // Enable blending for transparancy effects etc...
+    SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
     // Initialise and prepare fonts.
     if (load_fonts() == -1) {
@@ -111,17 +116,15 @@ int main(int argc, char *args[])
     SDL_Texture *logo_image = SDL_CreateTextureFromSurface(renderer, logo_image_surface);
     SDL_FreeSurface(logo_image_surface);
 
-    Label *new_label = Label_Create(renderer, 20, 20, "Hello Labels.", fonts.font_regular, white, 1, 10, 1);
-    Label *test_label = Label_Create(renderer, 200, 20, "Testing Label 2", fonts.font_regular, white, 1, 10, 1);
+    Label *test_label = Label_Create(renderer, window_width - 135, 15, "Testing Label", fonts.font_regular, white, 1, 10, 1);
+    Button *test_button_list[8] = {0};
+    for (int i = 0; i < 8; i++) {
+        test_button_list[i] = Button_Create(renderer, window_width - 135, 45 + i * 30, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
+    }
 
-    Button *new_button = Button_Create(renderer, 20, 55, "Hello Buttons.", fonts.font_regular, white, 10, 1, NULL);
+    Window *text_window = Window_Create();
 
-    Button *new_button1 = Button_Create(renderer, 20, 100, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button2 = Button_Create(renderer, 20, 130, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button3 = Button_Create(renderer, 20, 160, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button4 = Button_Create(renderer, 20, 190, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button5 = Button_Create(renderer, 20, 220, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
-    Button *new_button6 = Button_Create(renderer, 20, 250, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
+    SDL_StartTextInput();
 
     SDL_Event event;
     while (cmacs_running) {
@@ -131,16 +134,58 @@ int main(int argc, char *args[])
 
             switch (event.type) {
                 case SDL_QUIT:
-                    return 1;
+                    cmacs_running = false;
+                    break;
 
                 case SDL_KEYDOWN:
                     switch(event.key.keysym.scancode) {
+                        case SDL_SCANCODE_RETURN:
+                            Window_NewLine(text_window);
+                            break;
+                        case SDL_SCANCODE_UP:
+                            Window_CursorUp(text_window);
+                            break;
+                        case SDL_SCANCODE_DOWN:
+                            Window_CursorDown(text_window);
+                            break;
+                        case SDL_SCANCODE_TAB:
+                            // Tab-width of 4 spaces...
+                            for (int i = 0; i < 4; i++) {
+                                StrBuffer_AddChar(text_window->buffer->current_line, ' ', text_window->cursor.column);
+                                text_window->cursor.column++;
+                                if(text_window->cursor.column % 4 == 0)
+	                                break;
+                            }
+                            break;
+                        case SDL_SCANCODE_BACKSPACE:
+                            if (text_window->cursor.column < 1) {
+                                if (text_window->cursor.line < 1) break;
+                                Window_RemoveLine(text_window);
+                            } else {
+                                text_window->cursor.column--;
+                                StrBuffer_RemoveChar(text_window->buffer->current_line, text_window->cursor.column);
+                            };
+                            break;
+                        case SDL_SCANCODE_LEFT:
+                            Window_CursorLeft(text_window);
+                            break;
+                        case SDL_SCANCODE_RIGHT:
+                            Window_CursorRight(text_window);
+                            break;
+                        
                         case SDL_SCANCODE_Q:
                         case SDL_SCANCODE_ESCAPE:
-                        cmacs_running = false;
+                            cmacs_running = false;
                         default:
                         break;
                     }
+                    break;
+
+                case SDL_TEXTINPUT:
+                    // This will cause problems for bigger chars. Will need to handle SDL_TEXTEDITNG
+                    //                                                   |
+                    StrBuffer_AddChar(text_window->buffer->current_line, event.text.text[0], text_window->cursor.column);
+                    text_window->cursor.column++;
                     break;
 
                 case SDL_MOUSEMOTION:
@@ -148,15 +193,13 @@ int main(int argc, char *args[])
                     break;
 
                 case SDL_MOUSEBUTTONDOWN:
-                    if (event.button.button == SDL_BUTTON_LEFT) {
-                        Button_CallFor_AllButtons(Button_PressCheck);            
-                    }
+                    if (event.button.button == SDL_BUTTON_LEFT)
+                        Button_CallFor_AllButtons(Button_PressCheck);
                     break;
 
                 case SDL_MOUSEBUTTONUP:    
-                    if (event.button.button == SDL_BUTTON_LEFT) {
+                    if (event.button.button == SDL_BUTTON_LEFT)
                         Button_CallFor_AllButtons(Button_ReleaseCheck);
-                    }
                     break;
             }
 
@@ -166,16 +209,21 @@ int main(int argc, char *args[])
                         window_width = event.window.data1; 
                         window_height = event.window.data2;
 
-                        // Calc text position.
+                        // Calc logo position.
+                        logo_rect.x = window_width / 2 - (logo_rect.w / 2);
+                        logo_rect.y = window_height / 2 - (logo_rect.h / 2) - 40;
+
+                        // Calc tagline position.
                         Label_SetPos(tagline, 
                             window_width / 2 - (tagline->rect.w / 2),
                             window_height / 2 - (tagline->rect.h / 2) + 115
                         );
 
-                        // Calc logo position.
-                        logo_rect.x = window_width / 2 - (logo_rect.w / 2);
-                        logo_rect.y = window_height / 2 - (logo_rect.h / 2) - 40;
-
+                        // Update label & buttons.
+                        Label_SetPos(test_label, window_width - 135, test_label->rect.y);
+                        for (int i = 0; i < 8; i++) {
+                            Button_SetPos(test_button_list[i], window_width - 135, test_button_list[i]->rect.y);
+                        }
                         break;
                 }
             }
@@ -184,7 +232,9 @@ int main(int argc, char *args[])
         // Clear screen.
         SDL_SetRenderDrawColor(renderer, 40, 40, 45, 255);
         SDL_RenderClear(renderer);
-        
+
+        Window_Render(text_window, renderer);
+
         SDL_RenderCopy(renderer, logo_image, NULL, &logo_rect);
 
         Label_RenderCopy_AllLabels(renderer);
@@ -196,6 +246,8 @@ int main(int argc, char *args[])
     }
 
     // Graceful exit.
+    Window_Destroy(text_window);
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();

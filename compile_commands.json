@@ -1,0 +1,122 @@
+[
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-O3",
+      "-I",
+      "src",
+      "-o",
+      "obj/ui/button.o",
+      "src/ui/button.c"
+    ],
+    "directory": "/home/anna/proj/cmacs",
+    "file": "/home/anna/proj/cmacs/src/ui/button.c",
+    "output": "/home/anna/proj/cmacs/obj/ui/button.o"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-O3",
+      "-I",
+      "src",
+      "-o",
+      "obj/ui/label.o",
+      "src/ui/label.c"
+    ],
+    "directory": "/home/anna/proj/cmacs",
+    "file": "/home/anna/proj/cmacs/src/ui/label.c",
+    "output": "/home/anna/proj/cmacs/obj/ui/label.o"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-O3",
+      "-I",
+      "src",
+      "-o",
+      "obj/main.o",
+      "src/main.c"
+    ],
+    "directory": "/home/anna/proj/cmacs",
+    "file": "/home/anna/proj/cmacs/src/main.c",
+    "output": "/home/anna/proj/cmacs/obj/main.o"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-O3",
+      "-I",
+      "src",
+      "-o",
+      "obj/str_buffer.o",
+      "src/str_buffer.c"
+    ],
+    "directory": "/home/anna/proj/cmacs",
+    "file": "/home/anna/proj/cmacs/src/str_buffer.c",
+    "output": "/home/anna/proj/cmacs/obj/str_buffer.o"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-O3",
+      "-I",
+      "src",
+      "-o",
+      "obj/cmacs_buffer.o",
+      "src/cmacs_buffer.c"
+    ],
+    "directory": "/home/anna/proj/cmacs",
+    "file": "/home/anna/proj/cmacs/src/cmacs_buffer.c",
+    "output": "/home/anna/proj/cmacs/obj/cmacs_buffer.o"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-O3",
+      "-I",
+      "src",
+      "-o",
+      "obj/textures.o",
+      "src/textures.c"
+    ],
+    "directory": "/home/anna/proj/cmacs",
+    "file": "/home/anna/proj/cmacs/src/textures.c",
+    "output": "/home/anna/proj/cmacs/obj/textures.o"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-O3",
+      "-I",
+      "src",
+      "-o",
+      "obj/fonts.o",
+      "src/fonts.c"
+    ],
+    "directory": "/home/anna/proj/cmacs",
+    "file": "/home/anna/proj/cmacs/src/fonts.c",
+    "output": "/home/anna/proj/cmacs/obj/fonts.o"
+  },
+  {
+    "arguments": [
+      "/sbin/gcc",
+      "-c",
+      "-O3",
+      "-I",
+      "src",
+      "-o",
+      "obj/window.o",
+      "src/window.c"
+    ],
+    "directory": "/home/anna/proj/cmacs",
+    "file": "/home/anna/proj/cmacs/src/window.c",
+    "output": "/home/anna/proj/cmacs/obj/window.o"
+  }
+]
