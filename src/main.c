@@ -153,6 +153,8 @@ int main(int argc, char *args[])
                             for (int i = 0; i < 4; i++) {
                                 StrBuffer_AddChar(text_window->buffer->current_line, ' ', text_window->cursor.column);
                                 text_window->cursor.column++;
+                                if(text_window->cursor.column % 4 == 0)
+	                                break;
                             }
                             break;
                         case SDL_SCANCODE_BACKSPACE:
