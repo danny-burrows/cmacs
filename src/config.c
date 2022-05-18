@@ -1,6 +1,8 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include "config.h"
 #include "cmacs_lang_layer.h"
@@ -10,20 +12,42 @@
 
 #define CMACS_CONFIG_BUFFER_LENGTH 128
 
-Config globalConfig = {.tabwidth = 8};
+Config globalConfig = {
+    .tabwidth = 8,
+    .window_width = 800,
+    .window_height = 600,
+	.file_path = "cmacs.conf"};
+
+// local definitions
+local char config_set_value(char *key, char *value);
+local char config_parse_uint(uint* dest, char* value);
+
 
 local char config_set_value(char* key, char* value)
 {
 	if(strcmp(key, "tabwidth") == 0)
 	{
-		char* check = 0;
-		uint new_tabwidth = strtoul(value, &check, 10);
-		if(check == value)
+		if(config_parse_uint(&globalConfig.tabwidth, value) != 0)
 		{
-			printf("[WARN] could not parse the value of key %s, likely cause: it is not an int\n", key);
+			printf("in key %s\n", key);
 			return -1;
 		}
-		globalConfig.tabwidth = new_tabwidth;
+	}
+	else if (strcmp(key, "window_width") == 0)
+	{
+		if(config_parse_uint(&globalConfig.window_width, value) != 0)
+		{
+			printf("in key %s\n", key);
+			return -1;
+		}
+	}
+	else if (strcmp(key, "window_height") == 0)
+	{
+		if(config_parse_uint(&globalConfig.window_height, value) != 0)
+		{
+			printf("in key %s\n", key);
+			return -1;
+		}
 	}
 	else
 	{
@@ -33,12 +57,30 @@ local char config_set_value(char* key, char* value)
 	return 0;
 }
 
-char config_load(char* filepath)
+local char config_parse_uint(uint* dest, char* value)
 {
-	FILE* file_ptr = fopen(filepath, "r");
+	char* check = 0;
+	uint new_val = strtoul(value, &check, 10);
+	if(check == value)
+	{
+		printf("[WARN] could not parse unsigned int ");
+		return -1;
+	}
+	if(new_val > UINT_MAX)
+	{
+		printf("[WARN] unsigned int bound (%d) exceeded, tried to read %ul ", UINT_MAX, new_val);
+	}
+	*dest = new_val;
+	return 0;
+}
+
+char config_load()
+{
+	FILE* file_ptr = fopen(globalConfig.file_path, "r");
 	if(file_ptr == NULL)
 	{
-		printf("[WARN] could not open config file at %s, likely cause: it does not exist\n", filepath);
+		printf("[WARN] could not open config file at %s, reported error: %m\n",
+		       globalConfig.file_path);
 		return -1;
 	}
 	char key_buffer[CMACS_CONFIG_BUFFER_LENGTH+1] = {0};
@@ -51,17 +93,21 @@ char config_load(char* filepath)
 	{
 		if(key_buffer[CMACS_CONFIG_BUFFER_LENGTH] != 0)
 		{
-			printf("[WARN] could not parse line %d of config file %s, key too long!\n", i, filepath);
+			printf("[WARN] could not parse line %d of config file %s, key too long!\n", i, globalConfig.file_path);
+			fclose(file_ptr);
 			return -1;
 		}
 		else if(value_buffer[CMACS_CONFIG_BUFFER_LENGTH] != 0)
 		{
-			printf("[WARN] could not parse line %d (with key %s) of config file %s, value too long\n!", i, key_buffer, filepath);
+			printf("[WARN] could not parse line %d (with key %s) of config file %s, value too long\n!", i, key_buffer, globalConfig.file_path);
+			fclose(file_ptr);
 			return -1;
 		}
 		config_set_value(key_buffer, value_buffer);
 	eof_reached = fscanf(file_ptr, "%s" strval(CMACS_CONFIG_BUFFER_LENGTH), key_buffer);
 	eof_reached = fscanf(file_ptr, "%s" strval(CMACS_CONFIG_BUFFER_LENGTH), value_buffer);
 	}
+	fclose(file_ptr);
 	return 0;
 }
+

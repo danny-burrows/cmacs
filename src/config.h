@@ -5,11 +5,14 @@
 
 typedef struct Config_
 {
-	u8 tabwidth;
+	uint tabwidth;
+	uint window_width;
+	uint window_height;
+	char file_path[];
 }Config;
 
 extern Config globalConfig;
 
-char config_load(char* filepath);
+char config_load();
 
 #endif

@@ -36,8 +36,8 @@ static SDL_Window *init_sdl2_window(void)
         window_title,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        window_width,
-        window_height,
+        globalConfig.window_width,
+        globalConfig.window_height,
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
 
@@ -55,6 +55,12 @@ static SDL_Window *init_sdl2_window(void)
 // SDL Requires this exact signature for cross platform.
 int main(int argc, char *args[]) 
 {
+	// load config first so we can affect window creation
+    if(config_load() == -1)
+    {
+	    printf("[WARN] could not load config, using defaults\n");
+    }
+
     SDL_Window *window = init_sdl2_window();
     if (window == NULL) return -1;
 
@@ -96,10 +102,6 @@ int main(int argc, char *args[])
         return -1;
     }
 
-    if(config_load("cmacs.conf") == -1)
-    {
-	    printf("[WARN] could not load config, using defaults\n");
-    }
 
     // Tagline text.
     Label *tagline = Label_Create(renderer, 0, 0,
