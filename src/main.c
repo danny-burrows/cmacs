@@ -13,6 +13,7 @@
 #include "ui/label.h"
 #include "ui/button.h"
 #include "config.h"
+#include "args_parser.h"
 
 static bool         cmacs_running = true;
 static char        *window_title  = "cmacs";
@@ -55,6 +56,19 @@ static SDL_Window *init_sdl2_window(void)
 // SDL Requires this exact signature for cross platform.
 int main(int argc, char *args[]) 
 {
+	switch(args_parser(argc, args))
+	{
+	case 0:
+		printf("[INFO] Correctly parsed arguments\n");
+		break;
+	case 1:
+		printf("[INFO] Exiting without opening, due to command arguments\n");
+		return 0;
+	case -1:
+		printf("[ERROR] Exiting program\n");
+		return 1;
+	}
+	
 	// load config first so we can affect window creation
     if(config_load() == -1)
     {
