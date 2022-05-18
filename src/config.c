@@ -79,8 +79,8 @@ char config_load()
 	FILE* file_ptr = fopen(globalConfig.file_path, "r");
 	if(file_ptr == NULL)
 	{
-		printf("[WARN] could not open config file at %s, reported error: %m\n",
-		       globalConfig.file_path);
+		fprintf(stderr, "[WARN] Could not open config file at %s: ", globalConfig.file_path);
+		perror("");
 		return -1;
 	}
 	char key_buffer[CMACS_CONFIG_BUFFER_LENGTH+1] = {0};

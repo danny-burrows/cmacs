@@ -16,8 +16,8 @@
 
 static bool         cmacs_running = true;
 static char        *window_title  = "cmacs";
-static unsigned int window_width  = 640;
-static unsigned int window_height = 480;
+unsigned int window_width;
+unsigned int window_height;
 
 SDL_Color white = {255, 255, 255, 255};
 
@@ -60,6 +60,8 @@ int main(int argc, char *args[])
     {
 	    printf("[WARN] could not load config, using defaults\n");
     }
+    window_width  = globalConfig.window_width;
+    window_height = globalConfig.window_height;
 
     SDL_Window *window = init_sdl2_window();
     if (window == NULL) return -1;
@@ -158,7 +160,7 @@ int main(int argc, char *args[])
                             break;
                         case SDL_SCANCODE_TAB:
                             // Tab-width of 4 spaces...
-                            for (int i = 0; i < globalConfig.tabwidth; i++) {
+                            for (unsigned int i = 0; i < globalConfig.tabwidth; i++) {
                                 StrBuffer_AddChar(text_window->buffer->current_line, ' ', text_window->cursor.column);
                                 text_window->cursor.column++;
                                 if(text_window->cursor.column % globalConfig.tabwidth == 0)
