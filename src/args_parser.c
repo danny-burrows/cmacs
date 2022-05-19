@@ -4,7 +4,10 @@
 
 #include "args_parser.h"
 
-#define ARGS_PARSER_OPTION_AMOUNT 2
+#define ARGS_PARSER_OPTION_AMOUNT 3
+
+extern int   start_file;
+extern char *start_file_path;
 
 argument argOptions[ARGS_PARSER_OPTION_AMOUNT] = {0};
 
@@ -37,6 +40,16 @@ static char displayHelpNTimes(char** options)
 	return 1;
 }
 
+static char openFile(char **options) {
+	char* opt = *(options+1);
+	printf("Opening File: %s\n", opt);
+	
+	start_file = 1;
+	start_file_path = opt;
+
+	return 0;
+}
+
 /*
   Returns:
   0 on success -> launch program
@@ -56,6 +69,10 @@ char args_parser(int argc, char **argv)
 	argOptions[1].args = 1;
 	argOptions[1].func = &displayHelpNTimes;
 	strcpy(argOptions[1].flag, "-H");
+
+	argOptions[2].args = 1;
+	argOptions[2].func = &openFile;
+	strcpy(argOptions[2].flag, "-f");
 
 	char found_flag; // set if we find the flag that the user passed
 	for(int i=1; i < argc; i++)

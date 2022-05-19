@@ -20,6 +20,9 @@ static char        *window_title  = "cmacs";
 unsigned int window_width;
 unsigned int window_height;
 
+int   start_file = 0;
+char *start_file_path;
+
 SDL_Color white = {255, 255, 255, 255};
 
 static SDL_Window *init_sdl2_window(void)
@@ -76,6 +79,46 @@ int main(int argc, char *args[])
     }
     window_width  = globalConfig.window_width;
     window_height = globalConfig.window_height;
+
+    // Create first cmacs window buffer.
+    Window *text_window = Window_Create();
+
+    // Read file parsed by arguments...
+    if (start_file) {
+        printf("Open file... %s\n", start_file_path);
+
+        FILE * fp;
+        char * line = NULL;
+        size_t len = 0;
+        ssize_t read;
+
+        fp = fopen(start_file_path, "r");
+        if (fp == NULL) {
+            perror("Failed to read file");
+            exit(EXIT_FAILURE);
+        }
+
+        while ((read = getline(&line, &len, fp)) != -1) {
+            
+            int i = 0;
+            char *c = line;
+            while (*c)
+            {    
+                if (*c == '\n')
+                    Window_NewLine(text_window);
+                else {
+                    StrBuffer_AddChar(text_window->buffer->current_line, *c, i);
+                    text_window->cursor.column++;
+                }
+                
+                c++; i++;
+            }
+        }
+
+        fclose(fp);
+        if (line)
+            free(line);
+    }
 
     SDL_Window *window = init_sdl2_window();
     if (window == NULL) return -1;
@@ -145,8 +188,6 @@ int main(int argc, char *args[])
     for (int i = 0; i < 8; i++) {
         test_button_list[i] = Button_Create(renderer, window_width - 135, 45 + i * 30, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
     }
-
-    Window *text_window = Window_Create();
 
     SDL_StartTextInput();
 
