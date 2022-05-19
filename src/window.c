@@ -97,6 +97,44 @@ int Window_CursorRight(Window *window)
 }
 
 
+int Window_OpenFile(Window *window, const char *filepath)
+{
+    // Should really probably ensure the window is clean here first...
+
+    FILE *fp;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    fp = fopen(filepath, "r");
+    if (fp == NULL) {
+        perror("Failed to open file");
+        return -1;
+    }
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+        int i = 0;
+        char *c = line;
+        while (*c)
+        {    
+            if (*c == '\n')
+                Window_NewLine(window);
+            else {
+                StrBuffer_AddChar(window->buffer->current_line, *c, i);
+                window->cursor.column++;
+            }
+            c++; i++;
+        }
+    }
+
+    fclose(fp);
+    if (line)
+        free(line);
+
+    return 0;
+}
+
+
 static SDL_Surface *text_buffer_surface = NULL;
 static SDL_Texture *text_buffer_texture = NULL;
 static SDL_Rect type_text_rect = {0};

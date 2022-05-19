@@ -85,41 +85,8 @@ int main(int argc, char *args[])
     Window *text_window = Window_Create();
 
     // Read file parsed by arguments...
-    if (start_file) {
-        printf("Open file... %s\n", start_file_path);
-
-        FILE * fp;
-        char * line = NULL;
-        size_t len = 0;
-        ssize_t read;
-
-        fp = fopen(start_file_path, "r");
-        if (fp == NULL) {
-            perror("Failed to read file");
-            exit(EXIT_FAILURE);
-        }
-
-        while ((read = getline(&line, &len, fp)) != -1) {
-            
-            int i = 0;
-            char *c = line;
-            while (*c)
-            {    
-                if (*c == '\n')
-                    Window_NewLine(text_window);
-                else {
-                    StrBuffer_AddChar(text_window->buffer->current_line, *c, i);
-                    text_window->cursor.column++;
-                }
-                
-                c++; i++;
-            }
-        }
-
-        fclose(fp);
-        if (line)
-            free(line);
-    }
+    if (start_file)
+        Window_OpenFile(text_window, start_file_path);
 
     SDL_Window *window = init_sdl2_window();
     if (window == NULL) return -1;
