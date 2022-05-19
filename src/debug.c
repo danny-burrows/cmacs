@@ -1,10 +1,12 @@
 #include "debug.h"
 
 int d_printf(DEBUG_LEVEL debug_level, const char * format, ...) {
-    
-    int r = 0;
 
-#ifdef DEBUG_CONFIG_SET
+#ifndef DEBUG_CONFIG_SET
+    if (debug_level == INFO) return 0;
+#endif
+
+    int r = 0;
 
     switch (debug_level) {
         case INFO:
@@ -38,8 +40,6 @@ int d_printf(DEBUG_LEVEL debug_level, const char * format, ...) {
         fflush(stderr);
     else
         fflush(stdout);
-
-#endif
 
     return r;
 }
