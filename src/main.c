@@ -77,6 +77,7 @@ int main(int argc, char *args[])
     {
 	    printf("[WARN] could not load config, using defaults\n");
     }
+
     window_width  = globalConfig.window_width;
     window_height = globalConfig.window_height;
 

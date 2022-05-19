@@ -15,8 +15,11 @@
 Config globalConfig = {
     .tabwidth = 8,
     .window_width = 800,
+    .window_width_overridden = 0,
     .window_height = 600,
-	.file_path = "cmacs.conf"};
+    .window_height_overridden = 0,
+    .file_path = "cmacs.conf",
+	.enabled = 1};
 
 // local definitions
 local char config_set_value(char *key, char *value);
@@ -35,18 +38,24 @@ local char config_set_value(char* key, char* value)
 	}
 	else if (strcmp(key, "window_width") == 0)
 	{
-		if(config_parse_uint(&globalConfig.window_width, value) != 0)
+		if(!globalConfig.window_width_overridden)
 		{
-			printf("in key %s\n", key);
-			return -1;
+			if(config_parse_uint(&globalConfig.window_width, value) != 0)
+			{
+				printf("in key %s\n", key);
+				return -1;
+			}
 		}
 	}
 	else if (strcmp(key, "window_height") == 0)
 	{
-		if(config_parse_uint(&globalConfig.window_height, value) != 0)
+		if(!globalConfig.window_height_overridden)
 		{
-			printf("in key %s\n", key);
-			return -1;
+			if(config_parse_uint(&globalConfig.window_height, value) != 0)
+			{
+				printf("in key %s\n", key);
+				return -1;
+			}
 		}
 	}
 	else
@@ -76,6 +85,11 @@ local char config_parse_uint(uint* dest, char* value)
 
 char config_load()
 {
+	if(!globalConfig.enabled)
+	{
+		printf("[INFO] config not loaded (argument passed), using defaults\n");
+		return 0;
+	}
 	FILE* file_ptr = fopen(globalConfig.file_path, "r");
 	if(file_ptr == NULL)
 	{
@@ -104,8 +118,8 @@ char config_load()
 			return -1;
 		}
 		config_set_value(key_buffer, value_buffer);
-	eof_reached = fscanf(file_ptr, "%s" strval(CMACS_CONFIG_BUFFER_LENGTH), key_buffer);
-	eof_reached = fscanf(file_ptr, "%s" strval(CMACS_CONFIG_BUFFER_LENGTH), value_buffer);
+		eof_reached = fscanf(file_ptr, "%s" strval(CMACS_CONFIG_BUFFER_LENGTH), key_buffer);
+		eof_reached = fscanf(file_ptr, "%s" strval(CMACS_CONFIG_BUFFER_LENGTH), value_buffer);
 	}
 	fclose(file_ptr);
 	return 0;

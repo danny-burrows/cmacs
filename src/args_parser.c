@@ -1,43 +1,85 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #include "args_parser.h"
+#include "config.h"
 
-#define ARGS_PARSER_OPTION_AMOUNT 3
+#define ARGS_PARSER_OPTION_AMOUNT 5
 
 extern int   start_file;
 extern char *start_file_path;
 
 argument argOptions[ARGS_PARSER_OPTION_AMOUNT] = {0};
 
+static char args_parseUInt(uint* dest, char* str)
+{
+	char* check = 0;
+	unsigned long x = strtoul(str, &check, 10);
+	if(check == str)
+	{
+		fprintf(stderr, "[ERROR] non number attempted to be parsed as"
+		        " unsigned int\n");
+		return -1;
+	}
+	if (x > UINT_MAX)
+	{
+		fprintf(stderr, "[ERROR] out of bounds for unsigned int, limit: %u"
+		        ", passed number: %lu\n", UINT_MAX, x);
+		return -1;
+	}
+	*dest = x;
+	return 0;
+}
+
 /*
   An example of how to do options that take no arguments
  */
 static char displayHelp(char** options)
 {
-	printf("CMACS\n");
+	printf("CMACS:\nUsage: cmacs [-h] [-W n] [-H n] [-f str]\n"
+	       "Arguments:\n"
+	       "    '-h' display this help text\n"
+	       "    '-W n' set the window width to n\n"
+		   "    '-H n' set the window height to n\n"
+	       "    '-n' do not load the config file\n"
+	       "    '-f str' open the file at str\n");
 	return 1;
 }
 
-/*
-  An example of how to do options that take a single argument
- */
-static char displayHelpNTimes(char** options)
+static char setWindowWidth(char** options)
 {
-	char* opt = *(options+1);
-	char* check = 0;
-	unsigned int x = strtoul(opt, &check, 10);
-	if(check == opt)
+	uint x = 0;
+	if(args_parseUInt(&x, *(options+1)) != 0)
 	{
-		fprintf(stderr, "[ERROR] negative number passed to flag '%s'\n", *options);
+		fprintf(stderr, "[ERROR] could not parse unsigned int to set "
+		        "window width\n");
 		return -1;
 	}
-	for (int i=0; i < x; i++)
+	globalConfig.window_width = x;
+	globalConfig.window_width_overridden = 1;
+	return 0;
+}
+
+static char setWindowHeight(char** options)
+{
+	uint x = 0;
+	if(args_parseUInt(&x, *(options+1)) != 0)
 	{
-		printf("help\n");
+		fprintf(stderr, "[ERROR] could not parse unsigned int to set "
+		        "window height\n");
+		return -1;
 	}
-	return 1;
+	globalConfig.window_height = x;
+	globalConfig.window_height_overridden = 1;
+	return 0;
+}
+
+static char disableConfig(char** options)
+{
+	globalConfig.enabled = 0;
+	return 0;
 }
 
 static char openFile(char **options) {
@@ -67,12 +109,20 @@ char args_parser(int argc, char **argv)
 	strcpy(argOptions[0].flag, "-h");
 
 	argOptions[1].args = 1;
-	argOptions[1].func = &displayHelpNTimes;
-	strcpy(argOptions[1].flag, "-H");
+	argOptions[1].func = &openFile;
+	strcpy(argOptions[1].flag, "-f");
 
 	argOptions[2].args = 1;
-	argOptions[2].func = &openFile;
-	strcpy(argOptions[2].flag, "-f");
+	argOptions[2].func = &setWindowWidth;
+	strcpy(argOptions[2].flag, "-W");
+
+	argOptions[3].args = 1;
+	argOptions[3].func = &setWindowHeight;
+	strcpy(argOptions[3].flag, "-H");
+
+	argOptions[4].args = 0;
+	argOptions[4].func = &disableConfig;
+	strcpy(argOptions[4].flag, "-n");
 
 	char found_flag; // set if we find the flag that the user passed
 	for(int i=1; i < argc; i++)
@@ -97,7 +147,7 @@ char args_parser(int argc, char **argv)
 				if (c == -1)
 				{ // -1 designates a failure to parse for some reason
 					fprintf(stderr, "[ERROR] could not parse command line argument"
-					        "%s\n", *(argv+i));
+					        " %s\n", *(argv+i));
 					return -1;
 				}
 				i += argOptions[j].args; // skip over the amount of args used by the current flag
