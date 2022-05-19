@@ -34,6 +34,11 @@ int d_printf(DEBUG_LEVEL debug_level, const char * format, ...) {
     //Reset terminal colors.
     printf("\033[0m");
 
+    if (debug_level == ERR)
+        fflush(stderr);
+    else
+        fflush(stdout);
+
 #endif
 
     return r;
