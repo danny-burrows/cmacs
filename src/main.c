@@ -59,23 +59,23 @@ static SDL_Window *init_sdl2_window(void)
 // SDL Requires this exact signature for cross platform.
 int main(int argc, char *args[]) 
 {
-	switch(args_parser(argc, args))
-	{
-	case 0:
-		printf("[INFO] Correctly parsed arguments\n");
-		break;
-	case 1:
-		printf("[INFO] Exiting without opening, due to command arguments\n");
-		return 0;
-	case -1:
-		printf("[ERROR] Exiting program\n");
-		return 1;
-	}
-	
-	// load config first so we can affect window creation
+    switch(args_parser(argc, args))
+    {
+    case 0:
+        printf("[INFO] Correctly parsed arguments\n");
+        break;
+    case 1:
+        printf("[INFO] Exiting without opening, due to command arguments\n");
+        return 0;
+    case -1:
+        printf("[ERROR] Exiting program\n");
+        return 1;
+    }
+    
+    // load config first so we can affect window creation
     if(config_load() == -1)
     {
-	    printf("[WARN] could not load config, using defaults\n");
+        printf("[WARN] could not load config, using defaults\n");
     }
 
     window_width  = globalConfig.window_width;
@@ -220,7 +220,7 @@ int main(int argc, char *args[])
                                 StrBuffer_AddChar(text_window->buffer->current_line, ' ', text_window->cursor.column);
                                 text_window->cursor.column++;
                                 if(text_window->cursor.column % globalConfig.tabwidth == 0)
-	                                break;
+                                    break;
                             }
                             break;
                         case SDL_SCANCODE_BACKSPACE:
