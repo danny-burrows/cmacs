@@ -5,6 +5,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_events.h>
 
+#include "debug.h"
 #include "fonts.h"
 #include "window.h"
 #include "textures.h"
@@ -62,20 +63,20 @@ int main(int argc, char *args[])
     switch(args_parser(argc, args))
     {
     case 0:
-        printf("[INFO] Correctly parsed arguments\n");
+        d_printf(INFO, "Correctly parsed arguments.\n");
         break;
     case 1:
-        printf("[INFO] Exiting without opening, due to command arguments\n");
+        d_printf(INFO, "Exiting without opening, due to command arguments.\n");
         return 0;
     case -1:
-        printf("[ERROR] Exiting program\n");
+        d_printf(ERR, "Exiting program.\n");
         return 1;
     }
     
     // load config first so we can affect window creation
     if(config_load() == -1)
     {
-        printf("[WARN] could not load config, using defaults\n");
+        d_printf(WARN, "Could not load config, using defaults.\n");
     }
 
     window_width  = globalConfig.window_width;
