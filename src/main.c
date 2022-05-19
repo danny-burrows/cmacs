@@ -30,7 +30,7 @@ static SDL_Window *init_sdl2_window(void)
 {
     // Initialise SDL.
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
-        fprintf(stderr, "SDL failed to initialise: %s\n", SDL_GetError());
+        d_printf(ERR, "SDL failed to initialise: %s\n", SDL_GetError());
 
         SDL_Quit();
         return NULL;
@@ -47,7 +47,7 @@ static SDL_Window *init_sdl2_window(void)
     );
 
     if (window == NULL) {
-        fprintf(stderr, "SDL failed to create window: %s\n", SDL_GetError());
+        d_printf(ERR, "SDL failed to create window: %s\n", SDL_GetError());
 
         SDL_DestroyWindow(window);
         SDL_Quit();
@@ -99,7 +99,7 @@ int main(int argc, char *args[])
     // Create SDL2 Renderer.
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == NULL) {
-        fprintf(stderr, "SDL Failed to create renderer: %s\n", SDL_GetError());
+        d_printf(ERR, "SDL Failed to create renderer: %s\n", SDL_GetError());
 
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -112,7 +112,7 @@ int main(int argc, char *args[])
 
     // Initialise and prepare fonts.
     if (load_fonts() == -1) {
-        fprintf(stderr, "TTF Failed to load fonts.\n");
+        d_printf(ERR, "TTF Failed to load fonts.\n");
 
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -122,7 +122,7 @@ int main(int argc, char *args[])
 
     // Load textures.
     if (load_textures(renderer) == -1) {
-        fprintf(stderr, "Failed to load textures.\n");
+        d_printf(ERR, "Failed to load textures.\n");
 
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
