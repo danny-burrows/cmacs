@@ -5,6 +5,7 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_events.h>
 
+#include "debug.h"
 #include "fonts.h"
 #include "window.h"
 #include "textures.h"
@@ -12,11 +13,16 @@
 #include "cmacs_buffer.h"
 #include "ui/label.h"
 #include "ui/button.h"
+#include "config.h"
+#include "args_parser.h"
 
 static bool         cmacs_running = true;
 static char        *window_title  = "cmacs";
-static unsigned int window_width  = 640;
-static unsigned int window_height = 480;
+unsigned int window_width;
+unsigned int window_height;
+
+int   start_file = 0;
+char *start_file_path;
 
 SDL_Color white = {255, 255, 255, 255};
 
@@ -24,7 +30,7 @@ static SDL_Window *init_sdl2_window(void)
 {
     // Initialise SDL.
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
-        fprintf(stderr, "SDL failed to initialise: %s\n", SDL_GetError());
+        d_printf(ERR, "SDL failed to initialise: %s\n", SDL_GetError());
 
         SDL_Quit();
         return NULL;
@@ -35,13 +41,13 @@ static SDL_Window *init_sdl2_window(void)
         window_title,
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        window_width,
-        window_height,
+        globalConfig.window_width,
+        globalConfig.window_height,
         SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
     );
 
     if (window == NULL) {
-        fprintf(stderr, "SDL failed to create window: %s\n", SDL_GetError());
+        d_printf(ERR, "SDL failed to create window: %s\n", SDL_GetError());
 
         SDL_DestroyWindow(window);
         SDL_Quit();
@@ -54,6 +60,35 @@ static SDL_Window *init_sdl2_window(void)
 // SDL Requires this exact signature for cross platform.
 int main(int argc, char *args[]) 
 {
+    switch(args_parser(argc, args))
+    {
+    case 0:
+        d_printf(INFO, "Correctly parsed arguments.\n");
+        break;
+    case 1:
+        d_printf(INFO, "Exiting without opening, due to command arguments.\n");
+        return 0;
+    case -1:
+        d_printf(ERR, "Exiting program.\n");
+        return 1;
+    }
+    
+    // load config first so we can affect window creation
+    if(config_load() == -1)
+    {
+        d_printf(WARN, "Could not load config, using defaults.\n");
+    }
+
+    window_width  = globalConfig.window_width;
+    window_height = globalConfig.window_height;
+
+    // Create first cmacs window buffer.
+    Window *text_window = Window_Create();
+
+    // Read file parsed by arguments...
+    if (start_file)
+        Window_OpenFile(text_window, start_file_path);
+
     SDL_Window *window = init_sdl2_window();
     if (window == NULL) return -1;
 
@@ -64,7 +99,7 @@ int main(int argc, char *args[])
     // Create SDL2 Renderer.
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == NULL) {
-        fprintf(stderr, "SDL Failed to create renderer: %s\n", SDL_GetError());
+        d_printf(ERR, "SDL Failed to create renderer: %s\n", SDL_GetError());
 
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -77,7 +112,7 @@ int main(int argc, char *args[])
 
     // Initialise and prepare fonts.
     if (load_fonts() == -1) {
-        fprintf(stderr, "TTF Failed to load fonts.\n");
+        d_printf(ERR, "TTF Failed to load fonts.\n");
 
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
@@ -87,13 +122,14 @@ int main(int argc, char *args[])
 
     // Load textures.
     if (load_textures(renderer) == -1) {
-        fprintf(stderr, "Failed to load textures.\n");
+        d_printf(ERR, "Failed to load textures.\n");
 
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         SDL_Quit();
         return -1;
     }
+
 
     // Tagline text.
     Label *tagline = Label_Create(renderer, 0, 0,
@@ -122,8 +158,6 @@ int main(int argc, char *args[])
         test_button_list[i] = Button_Create(renderer, window_width - 135, 45 + i * 30, "List of Buttons", fonts.font_regular, white, 10, 1, NULL);
     }
 
-    Window *text_window = Window_Create();
-
     SDL_StartTextInput();
 
     SDL_Event event;
@@ -150,11 +184,11 @@ int main(int argc, char *args[])
                             break;
                         case SDL_SCANCODE_TAB:
                             // Tab-width of 4 spaces...
-                            for (int i = 0; i < 4; i++) {
+                            for (unsigned int i = 0; i < globalConfig.tabwidth; i++) {
                                 StrBuffer_AddChar(text_window->buffer->current_line, ' ', text_window->cursor.column);
                                 text_window->cursor.column++;
-                                if(text_window->cursor.column % 4 == 0)
-	                                break;
+                                if(text_window->cursor.column % globalConfig.tabwidth == 0)
+                                    break;
                             }
                             break;
                         case SDL_SCANCODE_BACKSPACE:

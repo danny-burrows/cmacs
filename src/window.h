@@ -35,6 +35,8 @@ int Window_CursorLeft(Window *buffer);
 int Window_CursorRight(Window *buffer);
 
 
+int Window_OpenFile(Window *window, const char *filepath);
+
 int Window_Render(Window *window, SDL_Renderer *renderer);
 
 void Window_Destroy(Window *window);
