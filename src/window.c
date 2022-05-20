@@ -145,7 +145,7 @@ static SDL_Texture *line_num_texture = NULL;
 static SDL_Surface *line_num_surface = NULL;
 
 static SDL_Rect cursor_rect = {
-    0, 0, 9, 20,
+    0, 0, 8, 20,
 };
 
 static SDL_Color white = {255, 255, 255, 255};
@@ -212,7 +212,7 @@ int Window_Render(Window *window, SDL_Renderer *renderer)
     }
 
     // Draw Cursor...
-    cursor_rect.x = (window->cursor.column * 9) + 50;
+    cursor_rect.x = (window->cursor.column * cursor_rect.w) + 50;
     cursor_rect.y = window->cursor.line * (type_text_rect.h + 2);
     SDL_SetRenderDrawColor(renderer, 225, 225, 255, 90);        
     SDL_RenderFillRect(renderer, &cursor_rect);
