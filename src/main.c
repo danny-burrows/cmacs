@@ -207,7 +207,6 @@ int main(int argc, char *args[])
                             Window_CursorRight(text_window);
                             break;
                         
-                        case SDL_SCANCODE_Q:
                         case SDL_SCANCODE_ESCAPE:
                             cmacs_running = false;
                         default:
