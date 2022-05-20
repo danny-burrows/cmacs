@@ -4,7 +4,7 @@ Fonts fonts;
 
 int load_fonts(void) 
 {
-    fonts.font_mono_regular = TTF_OpenFont("assets/monoid-reg.ttf", 13);
+    fonts.font_mono_regular = TTF_OpenFont("assets/NotoSansMono-Regular.ttf", 13);
     if (fonts.font_mono_regular == NULL) return -1;
 
     fonts.font_regular = TTF_OpenFont("assets/open-sans.ttf", 15);
